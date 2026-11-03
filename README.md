@@ -15,7 +15,7 @@ The course follows one path, crystal → junction → transistor, in nine chapte
 - **Data**: the reference data sheet and devices used in the exercises.
 - **Downloads**: the course and the exercises as PDF.
 
-The site is fully static (HTML, CSS and a little JavaScript). It needs no server, no account, and no internet connection once downloaded. Equations are pre-rendered; no tracking or analytics is used.
+The site is fully static (HTML, CSS and a little JavaScript). It needs no server, no account, and no internet connection once downloaded. Equations are pre-rendered. Visits are counted with [GoatCounter](https://www.goatcounter.com), a privacy-friendly statistics service that uses no cookies and collects no personal data; the site works fully without it.
 
 ## Licence and attribution
 
