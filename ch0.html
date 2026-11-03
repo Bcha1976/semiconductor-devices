@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 0 · Why Semiconductor Devices? Goals, History and Technology · Semiconductor Devices Physics</title>
+<meta name="description" content="Physics as a tool · one material, many devices · the three cornerstones of the course · from vacuum tubes to nanometre transistors · how a chip is made">
+<link rel="stylesheet" href="assets/katex/katex.min.css"><link rel="stylesheet" href="assets/site.css">
+</head><body class="has-side">
+<header class="top"><a class="brand" href="index.html"><span class="brand-k">ENISO 2026/2027</span><span class="brand-t">Semiconductor Devices Physics</span></a>
+<nav class="nav"><a href="index.html">Home</a><a href="ch0.html" class="on">Course</a><a href="interactive.html">Interactive</a><a href="exercises.html">Exercises</a><a href="data.html">Data</a><a href="downloads.html">Downloads</a></nav><button class="menu" aria-label="Contents" id="menu">☰ Contents</button></header>
+<div class="wrap with-side"><aside class="side" id="side"><button class="side-close" aria-label="Close">×</button><div class="side-h">Course</div><ol class="chaps"><li class="on"><a href="ch0.html"><span class="n">0</span>Why Semiconductor Devices? Goals, History and Technology</a><ol class="toc"><li><a href="#physics-as-a-tool-devices-as-the-goal">0.1 Physics as a tool, devices as the goal</a></li><li><a href="#many-devices-one-material">0.2 Many devices, one material</a></li><li><a href="#beneath-the-cartoon-the-engineers-level">0.3 Beneath the cartoon: the engineer’s level</a></li><li><a href="#a-framework-not-a-catalogue">0.4 A framework, not a catalogue</a></li><li><a href="#the-three-cornerstones-of-the-course">0.5 The three cornerstones of the course</a></li><li><a href="#from-vacuum-tubes-to-transistors-a-short-history">0.6 From vacuum tubes to transistors: a short history</a></li><li><a href="#modern-devices-technologies-and-markets">0.7 Modern devices, technologies and markets</a></li><li><a href="#how-a-chip-is-made">0.8 How a chip is made</a></li></ol></li><li class=""><a href="ch1.html"><span class="n">1</span>Transport Phenomena: Drift, Diffusion and Continuity</a></li><li class=""><a href="ch2.html"><span class="n">2</span>Semiconductors at equilibrium: a qualitative view</a></li><li class=""><a href="ch3.html"><span class="n">3</span>Energy bands and the Fermi level</a></li><li class=""><a href="ch4.html"><span class="n">4</span>Carriers Out of Equilibrium</a></li><li class=""><a href="ch5.html"><span class="n">5</span>The PN Junction at Equilibrium</a></li><li class=""><a href="ch6.html"><span class="n">6</span>The PN Junction Out of Equilibrium</a></li><li class=""><a href="ch7.html"><span class="n">7</span>The Capacitance Effects of the Junction</a></li><li class=""><a href="ch8.html"><span class="n">8</span>The Bipolar Junction Transistor</a></li><li class=""><a href="annexA.html"><span class="n">A</span>Energy, one thread through the course</a></li><li class=""><a href="annexB.html"><span class="n">B</span>A biased intrinsic rod</a></li></ol></aside><main class="main"><div class="chap-head"><div class="chap-k">CHAPTER 0</div><h1>Why Semiconductor Devices? Goals, History and Technology</h1><p class="chap-kw">Physics as a tool · one material, many devices · the three cornerstones of the course · from vacuum tubes to nanometre transistors · how a chip is made</p><p class="chap-links"><a href="exercises.html#set0">Exercises for this chapter</a> · <a href="pdf/SemiconductorDevicesPhysics_Course_en.pdf">Course PDF</a></p></div><article class="course"><div class="situation"><p class="boxtitle">WHERE WE ARE</p>
+<p>This is the opening chapter of the course. It contains no derivation that later chapters need, but it says <strong>what the course is for, how it is built, and where its subject comes from</strong>. It can be read on its own, as a short introduction to semiconductor devices for engineers; it is also the map that the following chapters fill in.</p>
+</div>
+<div class="plan"><p class="boxtitle">CHAPTER OUTLINE</p>
+<p><a href="#sec:tool">0.1</a> Physics as a tool, devices as the goal</p>
+<p><a href="#sec:material">0.2</a> Many devices, one material</p>
+<p><a href="#sec:cartoon">0.3</a> Beneath the cartoon: the engineer’s level</p>
+<p><a href="#sec:framework">0.4</a> A framework, not a catalogue</p>
+<p><a href="#sec:cornerstones">0.5</a> The three cornerstones of the course</p>
+<p><a href="#sec:history">0.6</a> From vacuum tubes to transistors: a short history</p>
+<p><a href="#sec:modern">0.7</a> Modern devices, technologies and markets</p>
+<p><a href="#sec:chip">0.8</a> How a chip is made</p>
+<p>Summary · Questions for reflection · Answers · References · Credits</p>
+</div>
+<div class="infobox">
+<p class="boxtitle">LEARNING OBJECTIVES — WHAT THIS CHAPTER SETS OUT TO DO</p>
+<ul>
+<li><p>Explain why a course on devices is a course on <strong>semiconductors</strong>, and why physics is used here as a <strong>tool</strong> rather than studied for itself.</p></li>
+<li><p>Position the course with respect to simplified explanations: what it adds, and why an engineer needs it.</p></li>
+<li><p>Present the <strong>framework</strong> of the course: two prototype devices and three cornerstones (currents, carrier concentrations, continuity equation).</p></li>
+<li><p>Tell the story that led from the vacuum tube to the integrated circuit, and give the orders of magnitude of today’s industry and technology.</p></li>
+</ul>
+</div>
+<div class="goodbox">
+<p class="boxtitle">LEARNING OUTCOMES — BY THE END OF THE CHAPTER YOU CAN</p>
+<ul>
+<li><p>classify devices by family (analog, digital, power) and by function (rectify, switch and amplify, interact with light, store), and say what they have in common;</p></li>
+<li><p>state the three cornerstones of the course and say which chapter delivers each;</p></li>
+<li><p>describe what a vacuum diode and a triode do, and why the transistor replaced them;</p></li>
+<li><p>place on a timeline the main inventions, from the 1874 rectifying contact to the integrated circuit and the MOS transistor, with their inventors;</p></li>
+<li><p>name the four building blocks of semiconductor devices and the main steps of chip fabrication, and explain what EUV lithography does and what a ‘3 nm’ node is (and is not).</p></li>
+</ul>
+</div>
+<div class="infobox">
+<p class="boxtitle">HOW THIS CHAPTER WORKS</p>
+<ul>
+<li><p><strong>A narrative, not a formula sheet.</strong> The chapter tells why and how; the equations it shows are previews of what later chapters derive.</p></li>
+<li><p><strong>History with its physics.</strong> Each step of the history is attached to the physical idea that made it possible.</p></li>
+<li><p><strong>Facts rebuilt and cited.</strong> Tables and figures are drawn for this course from published facts; the sources are given at the end.</p></li>
+</ul>
+</div>
+<h2 id="physics-as-a-tool-devices-as-the-goal"><span class="secnum">0.1</span> Physics as a tool, devices as the goal</h2>
+<div id="sec:tool">
+
+</div>
+<div class="question"><p class="boxtitle">THE QUESTION</p>
+<p>The course is called ‘Semiconductor Devices Physics’. Is it a physics course?</p>
+</div>
+<p>The word <em>physics</em> in the title can be misread. <strong>Physics is not the goal of this course; it is its toolbox.</strong> The goal is to understand <strong>what happens inside the devices</strong>: why a diode lets current through in one direction only, why a transistor amplifies, why a junction emits light or turns light into electricity. To answer these questions we need physical tools, carrier transport, statistics, generation and recombination, and we shall take from physics exactly what the devices require, no more.</p>
+<p>This choice shapes everything that follows. A concept enters the course when a device needs it, and its treatment stops when the device is explained. The test of each chapter is therefore not ‘is the physics complete?’ but ‘can we now say what the device does, and compute it?’</p>
+<h2 id="many-devices-one-material"><span class="secnum">0.2</span> Many devices, one material</h2>
+<div id="sec:material">
+
+</div>
+<div class="question"><p class="boxtitle">THE QUESTION</p>
+<p>What do a microprocessor, a solar panel, a phone charger and a white LED have in common?</p>
+</div>
+<p>The word <em>device</em> covers an enormous family. Sorted by <strong>field of electronics</strong>, there are the devices of <strong>analog</strong> electronics (amplifiers, filters, sensors, radio-frequency circuits), of <strong>digital</strong> electronics (logic, processors, memories) and of <strong>power</strong> electronics (converters, motor drives, chargers). Sorted by <strong>function</strong>, some devices <strong>rectify</strong> (diodes), some <strong>switch and amplify</strong> (transistors), some <strong>interact with light</strong> (light-emitting diodes, lasers, solar cells, photodetectors), some <strong>store information</strong> (DRAM and flash memories).</p>
+<p>The answer to the question is that all of them are <strong>made of semiconductors</strong>: mostly silicon, and for specific needs germanium, gallium arsenide, gallium nitride, silicon carbide or indium phosphide (Fig. <a href="#fig:landscape">0.1</a>). The devices are many and different; the material underneath is shared. <strong>This is why the semiconductor itself is the central subject of the course</strong>: understand the material and its few basic structures, and the devices become variations on a common theme.</p>
+<figure>
+<img src="img/ch0/f0_landscape.svg" alt="" loading="lazy" style="width:92%" />
+<div id="fig:landscape">
+
+</div>
+<figcaption><strong>Figure 0.1.</strong> The device landscape. Sorted by family or by function, devices rest on one class of materials, the semiconductors.</figcaption>
+</figure>
+<h2 id="beneath-the-cartoon-the-engineers-level"><span class="secnum">0.3</span> Beneath the cartoon: the engineer’s level</h2>
+<div id="sec:cartoon">
+
+</div>
+<div class="question"><p class="boxtitle">THE QUESTION</p>
+<p>There are excellent videos explaining how a transistor works. Why a whole course?</p>
+</div>
+<p>A first picture of how a device works is easy to obtain today. Animated videos (the <em>Branch Education</em> channel is a good example), introductory books, or a question put to an AI assistant give, in a few minutes, a clear and largely correct <strong>working model</strong>: electrons flow here, a barrier forms there, the gate opens a channel. These pictures are useful, and we recommend them as a first contact.</p>
+<p>They are not what this course does. A cartoon tells <strong>what</strong> happens; it cannot tell <strong>how much</strong>, <strong>how fast</strong>, <strong>under which conditions</strong> it stops being true, or <strong>what to change</strong> to make the device better. Those questions need the <strong>driving mechanisms</strong> and their <strong>equations</strong>. An engineer designs, sizes, diagnoses and improves; for that a working model is not enough, a solid scientific background is required. This is the level at which the course is written.</p>
+<div class="infobox">
+<p class="boxtitle">THE CARTOON AND THE ENGINEER</p>
+<ul>
+<li><p><strong>The cartoon</strong> gives a qualitative picture of the mechanism. It is the right first step, and a good way to check one’s intuition.</p></li>
+<li><p><strong>The engineer</strong> needs the mechanism <em>and</em> its quantitative description: which carriers, how many, which currents, which equation governs them, and within which assumptions.</p></li>
+<li><p>The course goes from the first to the second: every mechanism is introduced with a picture, and then turned into an equation that can be solved.</p></li>
+</ul>
+</div>
+<h2 id="a-framework-not-a-catalogue"><span class="secnum">0.4</span> A framework, not a catalogue</h2>
+<div id="sec:framework">
+
+</div>
+<div class="question"><p class="boxtitle">THE QUESTION</p>
+<p>Will the course study every device?</p>
+</div>
+<p>No. What the course provides is a <strong>framework for studying devices</strong>, not a systematic review of all of them. A framework is a way of asking the questions and a set of tools to answer them; once acquired, it applies to devices the course never mentions.</p>
+<p>The framework is built on <strong>prototype examples</strong>. The central one is the <strong>PN junction</strong>, the simplest structure in which the ideas of the course all appear together, and the basis of diodes, solar cells and LEDs. The second is the <strong>transistor effect</strong>, treated in the spirit of the <strong>bipolar</strong> transistor, which is two junctions sharing a thin region.</p>
+<p>The <strong>MOS effect</strong>, on which today’s digital circuits rely, is deliberately <strong>not</strong> treated. This is a choice, not a gap: a student who has mastered the framework, carriers, currents, junctions and the continuity equation, will find the MOS transistor accessible in a later course or in industry, where it is the daily tool of microelectronics and of the semiconductor industry.</p>
+<h2 id="the-three-cornerstones-of-the-course"><span class="secnum">0.5</span> The three cornerstones of the course</h2>
+<div id="sec:cornerstones">
+
+</div>
+<div class="question"><p class="boxtitle">THE QUESTION</p>
+<p>Whatever the device, which questions shall we always ask?</p>
+</div>
+<p>All the work of the course revolves around <strong>three concepts</strong>, which the next four chapters establish one after the other (Fig. <a href="#fig:cornerstones">0.2</a>).</p>
+<ul>
+<li><p><strong>Currents.</strong> Wherever there is a device, there is a current; it is what the device delivers to the circuit. Chapter 1 builds the description of currents by drift in a field and by diffusion along a gradient, for instance for electrons:</p>
+<div class="eq"><span id="eq:current"></span><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable width="100%"><mtr><mtd width="50%"></mtd><mtd><mrow><msub><mi>J</mi><mi>n</mi></msub><mo>=</mo><mi>q</mi><mtext> </mtext><mi>n</mi><mtext> </mtext><msub><mi>μ</mi><mi>n</mi></msub><mtext> </mtext><mi mathvariant="script">E</mi><mo>+</mo><mi>q</mi><mtext> </mtext><msub><mi>D</mi><mi>n</mi></msub><mtext> </mtext><mfrac><mrow><mi mathvariant="normal">∂</mi><mi>n</mi></mrow><mrow><mi mathvariant="normal">∂</mi><mi>x</mi></mrow></mfrac></mrow></mtd><mtd width="50%"></mtd><mtd><mtext>(0.1)</mtext></mtd></mtr></mtable><annotation encoding="application/x-tex">J_n = q\,n\,\mu_n\,\mathcal{E} + q\,D_n\,\frac{\partial n}{\partial x} \tag{0.1}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.09618em;">J</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0962em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">q</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">μ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathcal" style="margin-right:0.08944em;">E</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:2.0574em;vertical-align:-0.686em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">q</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3714em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="margin-right:0.05556em;">∂</span><span class="mord mathnormal">x</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="margin-right:0.05556em;">∂</span><span class="mord mathnormal">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span><span class="tag"><span class="strut" style="height:2.0574em;vertical-align:-0.686em;"></span><span class="mord text"><span class="mord">(</span><span class="mord"><span class="mord">0.1</span></span><span class="mord">)</span></span></span></span></span></span></div></li>
+<li><p><strong>Carrier concentrations.</strong> A current is carried by mobile charges, whose concentrations <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> (electrons) and <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span></span></span></span> (holes) must be known. Chapter 2 explains what the carriers of a semiconductor are and how many there are; Chapter 3 shows what fixes them in equilibrium, and Chapter 4 how they return to it.</p></li>
+<li><p><strong>A governing equation.</strong> Concentrations change because carriers move (the divergence of the current) and because they are created and destroyed (generation <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">G</span></span></span></span> and recombination <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span></span></span></span>). This balance is the <strong>continuity equation</strong>:</p></li>
+</ul>
+<div class="keyeq">
+<div class="eq"><span id="eq:continuity"></span><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable width="100%"><mtr><mtd width="50%"></mtd><mtd><mrow><mfrac><mrow><mi mathvariant="normal">∂</mi><mi>n</mi></mrow><mrow><mi mathvariant="normal">∂</mi><mi>t</mi></mrow></mfrac><mo>=</mo><mfrac><mn>1</mn><mi>q</mi></mfrac><mtext> </mtext><mfrac><mrow><mi mathvariant="normal">∂</mi><msub><mi>J</mi><mi>n</mi></msub></mrow><mrow><mi mathvariant="normal">∂</mi><mi>x</mi></mrow></mfrac><mo>+</mo><mi>G</mi><mo>−</mo><mi>R</mi></mrow></mtd><mtd width="50%"></mtd><mtd><mtext>(0.2)</mtext></mtd></mtr></mtable><annotation encoding="application/x-tex">\frac{\partial n}{\partial t} = \frac{1}{q}\,\frac{\partial J_n}{\partial x} + G - R \tag{0.2}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:2.0574em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3714em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="margin-right:0.05556em;">∂</span><span class="mord mathnormal">t</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="margin-right:0.05556em;">∂</span><span class="mord mathnormal">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.2519em;vertical-align:-0.8804em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">q</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.8804em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3714em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="margin-right:0.05556em;">∂</span><span class="mord mathnormal">x</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="margin-right:0.05556em;">∂</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.09618em;">J</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0962em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">G</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span></span><span class="tag"><span class="strut" style="height:2.2519em;vertical-align:-0.8804em;"></span><span class="mord text"><span class="mord">(</span><span class="mord"><span class="mord">0.2</span></span><span class="mord">)</span></span></span></span></span></span></div>
+</div>
+<p>Developed for the excess minority carriers in a nearly neutral region, it becomes the <strong>ambipolar equation</strong> of Chapter 4, which describes how injected carriers spread and disappear:</p>
+<div class="eq"><span id="eq:ambipolar"></span><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable width="100%"><mtr><mtd width="50%"></mtd><mtd><mrow><mfrac><mrow><mi mathvariant="normal">∂</mi><mtext> </mtext><mi mathvariant="normal">Δ</mi><mi>p</mi></mrow><mrow><mi mathvariant="normal">∂</mi><mi>t</mi></mrow></mfrac><mo>=</mo><msub><mi>D</mi><mi>a</mi></msub><mtext> </mtext><mfrac><mrow><msup><mi mathvariant="normal">∂</mi><mn>2</mn></msup><mi mathvariant="normal">Δ</mi><mi>p</mi></mrow><mrow><mi mathvariant="normal">∂</mi><msup><mi>x</mi><mn>2</mn></msup></mrow></mfrac><mo>−</mo><mfrac><mrow><mi mathvariant="normal">Δ</mi><mi>p</mi></mrow><mi>τ</mi></mfrac><mo>+</mo><mi>g</mi></mrow></mtd><mtd width="50%"></mtd><mtd><mtext>(0.3)</mtext></mtd></mtr></mtable><annotation encoding="application/x-tex">\frac{\partial\,\Delta p}{\partial t} = D_a\,\frac{\partial^2 \Delta p}{\partial x^2} - \frac{\Delta p}{\tau} + g \tag{0.3}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:2.0574em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3714em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="margin-right:0.05556em;">∂</span><span class="mord mathnormal">t</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="margin-right:0.05556em;">∂</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">Δ</span><span class="mord mathnormal">p</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.1771em;vertical-align:-0.686em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">a</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.4911em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord" style="margin-right:0.05556em;">∂</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7401em;"><span style="top:-2.989em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord" style="margin-right:0.05556em;">∂</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mord">Δ</span><span class="mord mathnormal">p</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:2.0463em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3603em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1132em;">τ</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">Δ</span><span class="mord mathnormal">p</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span></span><span class="tag"><span class="strut" style="height:2.1771em;vertical-align:-0.686em;"></span><span class="mord text"><span class="mord">(</span><span class="mord"><span class="mord">0.3</span></span><span class="mord">)</span></span></span></span></span></span></div>
+<figure>
+<img src="img/ch0/f0_cornerstones.svg" alt="" loading="lazy" style="width:86%" />
+<div id="fig:cornerstones">
+
+</div>
+<figcaption><strong>Figure 0.2.</strong> The three cornerstones and their links. Every device of the course is analysed by asking the same three questions: which currents, which carrier concentrations, which equation connects them.</figcaption>
+</figure>
+<table style="width:30%;">
+<caption><strong>Table 0.1.</strong> Road map of the course.</caption>
+<colgroup>
+<col />
+<col style="width: 30%" />
+<col />
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Chapter</th>
+<th style="text-align: left;">Question</th>
+<th style="text-align: left;">Key result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">Why devices, why semiconductors?</td>
+<td style="text-align: left;">the framework and its history (this chapter)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">How do carriers move?</td>
+<td style="text-align: left;">drift and diffusion currents; Einstein relation; continuity equation</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">What are the carriers, and how many?</td>
+<td style="text-align: left;">electrons and holes; doping; mass-action law</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">3</td>
+<td style="text-align: left;">What fixes them in equilibrium?</td>
+<td style="text-align: left;">bands; <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> and <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span></span></span></span> of the pure semiconductor; Fermi level of doped material</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">4</td>
+<td style="text-align: left;">How do they relax?</td>
+<td style="text-align: left;">lifetime; ambipolar equation</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">next</td>
+<td style="text-align: left;">Applying the framework</td>
+<td style="text-align: left;">the PN junction (Chapters 5 to 7), then the bipolar transistor (Chapter 8)</td>
+</tr>
+</tbody>
+</table>
+<div id="tab:roadmap">
+
+</div>
+<h2 id="from-vacuum-tubes-to-transistors-a-short-history"><span class="secnum">0.6</span> From vacuum tubes to transistors: a short history</h2>
+<div id="sec:history">
+
+</div>
+<div class="question"><p class="boxtitle">THE QUESTION</p>
+<p>Before 1947 there were radios, long-distance telephones and even computers. What did they use, and why was it replaced?</p>
+</div>
+<h3 id="the-vacuum-tube-era"><span class="secnum">0.6.1</span> The vacuum-tube era</h3>
+<div id="sec:tubes">
+
+</div>
+<p>Before 1947, the devices that performed electronic functions were <strong>vacuum tubes</strong>. They did two things: they acted as <strong>valves</strong>, letting current flow one way or blocking it, which makes them <strong>switches</strong> for digital computation; and they acted as <strong>amplifiers</strong>, making a weak signal strong.</p>
+<p>The story starts with a lamp. In <strong>1879 Thomas Edison</strong> produced a practical incandescent lamp, a hot filament in a vacuum bulb. Around <strong>1883</strong> he noticed that a metal plate placed in the bulb collected a current when it was positive with respect to the filament, and none when it was negative: an <strong>asymmetry</strong>. The hot filament emits electrons (<strong>thermionic emission</strong>), and electrons can only travel from the filament to the plate.</p>
+<p>In <strong>1904 John Ambrose Fleming</strong> turned this asymmetry into a device, the <strong>thermionic valve</strong> or vacuum <strong>diode</strong> (Fig. <a href="#fig:tubes">0.3</a>a). It was a breakthrough because it detected radio signals reliably and made <strong>wireless telecommunication</strong> practical. In <strong>1906 Lee de Forest</strong> placed a <strong>grid</strong> between filament and plate: a small voltage on the grid controls a large current to the plate. This is the <strong>triode</strong> (Fig. <a href="#fig:tubes">0.3</a>b), the first electronic amplifier and the first electronic switch. Amplification allowed AT&amp;T to open the first transcontinental telephone line in 1915, with triode repeaters overcoming the attenuation of long lines; switching allowed the first electronic computers (ENIAC, 1945, with some 17 000 tubes) and IBM’s vacuum-tube machines of the early 1950s.</p>
+<figure>
+<img src="img/ch0/f0_tubes.svg" alt="" loading="lazy" style="width:78%" />
+<div id="fig:tubes">
+
+</div>
+<figcaption><strong>Figure 0.3.</strong> (a) The vacuum diode: electrons emitted by the hot cathode reach the plate, never the reverse. (b) The triode: the grid controls the flow; this is the principle of amplification and switching.</figcaption>
+</figure>
+<p>The current of a vacuum diode follows a law found by Child (1911) and Langmuir (1913), the first quantitative law of an electronic device: for a plate at a distance <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi></mrow><annotation encoding="application/x-tex">d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span></span></span></span> from the cathode, with <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>q</mi></mrow><annotation encoding="application/x-tex">q</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">q</span></span></span></span> and <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">m</span></span></span></span> the charge and mass of the electron,</p>
+<div class="eq"><span id="eq:child"></span><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable width="100%"><mtr><mtd width="50%"></mtd><mtd><mrow><mi>J</mi><mo>=</mo><mfrac><mrow><mn>4</mn><msub><mi>ε</mi><mn>0</mn></msub></mrow><mn>9</mn></mfrac><msqrt><mfrac><mrow><mn>2</mn><mi>q</mi></mrow><mi>m</mi></mfrac></msqrt><mtext> </mtext><mfrac><msup><mi>V</mi><mrow><mn>3</mn><mi mathvariant="normal">/</mi><mn>2</mn></mrow></msup><msup><mi>d</mi><mn>2</mn></msup></mfrac></mrow></mtd><mtd width="50%"></mtd><mtd><mtext>(0.4)</mtext></mtd></mtr></mtable><annotation encoding="application/x-tex">J = \frac{4\varepsilon_0}{9}\sqrt{\frac{2q}{m}}\,\frac{V^{3/2}}{d^2} \tag{0.4}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.09618em;">J</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.44em;vertical-align:-0.7884em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">9</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">4</span><span class="mord"><span class="mord mathnormal">ε</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mord sqrt"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.6516em;"><span class="svg-align" style="top:-4.4em;"><span class="pstrut" style="height:4.4em;"></span><span class="mord" style="padding-left:1em;"><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">m</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">2</span><span class="mord mathnormal" style="margin-right:0.03588em;">q</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span><span style="top:-3.6116em;"><span class="pstrut" style="height:4.4em;"></span><span class="hide-tail" style="min-width:1.02em;height:2.48em;"><svg xmlns="http://www.w3.org/2000/svg" width="400em" height="2.48em" viewBox="0 0 400000 2592" preserveAspectRatio="xMinYMin slice"><path d="M424,2478
+c-1.3,-0.7,-38.5,-172,-111.5,-514c-73,-342,-109.8,-513.3,-110.5,-514
+c0,-2,-10.7,14.3,-32,49c-4.7,7.3,-9.8,15.7,-15.5,25c-5.7,9.3,-9.8,16,-12.5,20
+s-5,7,-5,7c-4,-3.3,-8.3,-7.7,-13,-13s-13,-13,-13,-13s76,-122,76,-122s77,-121,77,-121
+s209,968,209,968c0,-2,84.7,-361.7,254,-1079c169.3,-717.3,254.7,-1077.7,256,-1081
+l0 -0c4,-6.7,10,-10,18,-10 H400000
+v40H1014.6
+s-87.3,378.7,-272.6,1166c-185.3,787.3,-279.3,1182.3,-282,1185
+c-2,6,-10,9,-24,9
+c-8,0,-12,-0.7,-12,-2z M1001 80
+h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.7884em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.565em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7401em;"><span style="top:-2.989em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.888em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">3/2</span></span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span><span class="tag"><span class="strut" style="height:2.44em;vertical-align:-0.7884em;"></span><span class="mord text"><span class="mord">(</span><span class="mord"><span class="mord">0.4</span></span><span class="mord">)</span></span></span></span></span></span></div>
+<p>Tubes worked, but they were <strong>large, fragile, power-hungry</strong> (the filament must be heated), slow to warm up, and limited in frequency. A computer of thousands of tubes failed every few hours.</p>
+<h3 id="a-crystal-that-worked-without-being-understood"><span class="secnum">0.6.2</span> A crystal that worked without being understood</h3>
+<div id="sec:crystal">
+
+</div>
+<p>Meanwhile a much smaller device existed. In <strong>1874 Ferdinand Braun</strong> discovered that a contact between a metal and certain crystals conducts better in one direction than in the other: the <strong>metal–semiconductor rectifying contact</strong>. From the early 1900s, notably with G. W. Pickard’s silicon detector patented in <strong>1906</strong>, crystal detectors with a fine metal wire pressed on the crystal, the <strong>cat’s whisker</strong>, were used in crystal radio sets. They rectified, sometimes well, but <strong>nobody understood why</strong>, and their behaviour depended on finding the right spot on the crystal. A device that is not understood cannot be designed. This is exactly the situation the physics of semiconductors would change.</p>
+<h3 id="the-transistor-1947"><span class="secnum">0.6.3</span> The transistor, 1947</h3>
+<div id="sec:transistor">
+
+</div>
+<p>After the Second World War, Bell Laboratories, the research centre of AT&amp;T, set up a group led by <strong>William Shockley</strong> to build a <strong>solid-state replacement for the vacuum tube</strong>. The idea was to imitate the grid of the triode: to control the current in a semiconductor with a field applied from outside, a <strong>field effect</strong>. It did not work, because charges trapped at the surface screened the field. Studying this failure, <strong>John Bardeen and Walter Brattain</strong> found a different effect: in <strong>December 1947</strong>, two gold contacts pressed very close together on a germanium crystal gave power gain. This <strong>point-contact transistor</strong> worked by <strong>injecting minority carriers</strong> across a junction, not by a field effect: it was the first <strong>bipolar</strong> transistor. In 1948–1949 Shockley worked out the theory of the p–n junction and of the <strong>junction transistor</strong>, which was realised in 1951. The three men received the Nobel Prize in Physics in 1956.</p>
+<p>The transistor was immediately used to <strong>amplify</strong> and to <strong>switch</strong>, and it transformed the industry: devices became <strong>smaller, cheaper, more reliable and more power-efficient</strong>, needed no warm-up, and worked at <strong>higher frequencies</strong>.</p>
+<h3 id="integration-the-mos-transistor-light-and-memory"><span class="secnum">0.6.4</span> Integration, the MOS transistor, light and memory</h3>
+<div id="sec:integration">
+
+</div>
+<p>The next step was to put many transistors on one piece of semiconductor. In <strong>1958 Jack Kilby</strong> (Texas Instruments) built the first <strong>integrated circuit</strong>, on germanium, with its components connected by fine wires. In <strong>1959 Robert Noyce</strong> (Fairchild), using the <strong>planar process</strong> of Jean Hoerni, made a <strong>monolithic</strong> silicon integrated circuit whose interconnections are deposited on the chip itself: this is the way all chips are made today. Also in <strong>1959</strong>, at Bell Labs, <strong>Mohamed Atalla and Dawon Kahng</strong> made the first working <strong>MOS transistor</strong> (metal–oxide–semiconductor), reported in 1960. It realised the field effect that had failed in 1947, thanks to the clean silicon–oxide interface: a gate voltage controls the current through an insulator, a solid-state version of the vacuum-tube grid. Its complementary version (CMOS, 1963) became the basis of digital electronics.</p>
+<p>Other effects followed in parallel. On the side of <strong>light</strong>: the first <strong>silicon solar cell</strong> (Bell Labs, 1954), the first visible <strong>LED</strong> and the semiconductor <strong>laser</strong> (1962), the bright <strong>blue LED</strong> (early 1990s) that completed white lighting. On the side of <strong>memory</strong>: the one-transistor <strong>DRAM</strong> cell (R. Dennard, 1966), the first commercial DRAM chip (1970), the floating-gate memory (1967) that led to <strong>flash</strong> memory in the 1980s. Figure <a href="#fig:timeline">0.4</a> gathers the main steps.</p>
+<figure>
+<img src="img/ch0/f0_timeline.svg" alt="" loading="lazy" style="width:98%" />
+<div id="fig:timeline">
+
+</div>
+<figcaption><strong>Figure 0.4.</strong> From the vacuum tube to the integrated circuit. Above the axis, the vacuum-tube devices and the first integrated circuit; below, the precursors and the transistor.</figcaption>
+</figure>
+<h3 id="the-equations-behind-the-story"><span class="secnum">0.6.5</span> The equations behind the story</h3>
+<div id="sec:laws">
+
+</div>
+<p>Each era of this story has its law (Fig. <a href="#fig:laws">0.5</a>). <strong>Ohm’s law</strong> (1827) describes conduction globally; Chapter 1 writes it locally, with the current density <strong>J</strong> and the electric field <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="script">E</mi></mrow><annotation encoding="application/x-tex">\mathcal{E}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathcal" style="margin-right:0.08944em;">E</span></span></span></span>:</p>
+<div class="eq"><span id="eq:ohm"></span><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable width="100%"><mtr><mtd width="50%"></mtd><mtd><mrow><mi>U</mi><mo>=</mo><mi>R</mi><mtext> </mtext><mi>I</mi><mspace width="2em"/><mo>⟺</mo><mspace width="2em"/><mover accent="true"><mi>J</mi><mo>⃗</mo></mover><mo>=</mo><mi>σ</mi><mtext> </mtext><mover accent="true"><mi mathvariant="script">E</mi><mo>⃗</mo></mover></mrow></mtd><mtd width="50%"></mtd><mtd><mtext>(0.5)</mtext></mtd></mtr></mtable><annotation encoding="application/x-tex">U = R\,I \qquad\Longleftrightarrow\qquad \vec J = \sigma\,\vec{\mathcal{E}} \tag{0.5}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">U</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7073em;vertical-align:-0.024em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="mspace" style="margin-right:2em;"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">⟺</span><span class="mspace" style="margin-right:2em;"></span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.9663em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9663em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.09618em;">J</span></span><span style="top:-3.2523em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.0688em;"><span class="overlay" style="height:0.714em;width:0.471em;"><svg xmlns="http://www.w3.org/2000/svg" width="0.471em" height="0.714em" style="width:0.471em" viewBox="0 0 471 714" preserveAspectRatio="xMinYMin"><path d="M377 20c0-5.333 1.833-10 5.5-14S391 0 397 0c4.667 0 8.667 1.667 12 5
+3.333 2.667 6.667 9 10 19 6.667 24.667 20.333 43.667 41 57 7.333 4.667 11
+10.667 11 18 0 6-1 10-3 12s-6.667 5-14 9c-28.667 14.667-53.667 35.667-75 63
+-1.333 1.333-3.167 3.5-5.5 6.5s-4 4.833-5 5.5c-1 .667-2.5 1.333-4.5 2s-4.333 1
+-7 1c-4.667 0-9.167-1.833-13.5-5.5S337 184 337 178c0-12.667 15.667-32.333 47-59
+H213l-171-1c-8.667-6-13-12.333-13-19 0-4.667 4.333-11.333 13-20h359
+c-16-25.333-24-45-24-59z"/></svg></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.9663em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">σ</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9663em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathcal" style="margin-right:0.08944em;">E</span></span><span style="top:-3.2523em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1522em;"><span class="overlay" style="height:0.714em;width:0.471em;"><svg xmlns="http://www.w3.org/2000/svg" width="0.471em" height="0.714em" style="width:0.471em" viewBox="0 0 471 714" preserveAspectRatio="xMinYMin"><path d="M377 20c0-5.333 1.833-10 5.5-14S391 0 397 0c4.667 0 8.667 1.667 12 5
+3.333 2.667 6.667 9 10 19 6.667 24.667 20.333 43.667 41 57 7.333 4.667 11
+10.667 11 18 0 6-1 10-3 12s-6.667 5-14 9c-28.667 14.667-53.667 35.667-75 63
+-1.333 1.333-3.167 3.5-5.5 6.5s-4 4.833-5 5.5c-1 .667-2.5 1.333-4.5 2s-4.333 1
+-7 1c-4.667 0-9.167-1.833-13.5-5.5S337 184 337 178c0-12.667 15.667-32.333 47-59
+H213l-171-1c-8.667-6-13-12.333-13-19 0-4.667 4.333-11.333 13-20h359
+c-16-25.333-24-45-24-59z"/></svg></span></span></span></span></span></span></span></span><span class="tag"><span class="strut" style="height:1.2163em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">(</span><span class="mord"><span class="mord">0.5</span></span><span class="mord">)</span></span></span></span></span></span></div>
+<p><strong>Drude</strong> (1900) explained the conductivity by free electrons of concentration <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> that collide every <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>τ</mi><mi>c</mi></msub></mrow><annotation encoding="application/x-tex">\tau_c</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1132em;">τ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.1132em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">c</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> on average, the starting point of Chapter 1:</p>
+<div class="eq"><span id="eq:drude"></span><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable width="100%"><mtr><mtd width="50%"></mtd><mtd><mrow><mi>σ</mi><mo>=</mo><mfrac><mrow><mi>n</mi><mtext> </mtext><msup><mi>q</mi><mn>2</mn></msup><mtext> </mtext><msub><mi>τ</mi><mi>c</mi></msub></mrow><mi>m</mi></mfrac></mrow></mtd><mtd width="50%"></mtd><mtd><mtext>(0.6)</mtext></mtd></mtr></mtable><annotation encoding="application/x-tex">\sigma = \frac{n\,q^2\,\tau_c}{m} \tag{0.6}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">σ</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.1771em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.4911em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">m</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">q</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1132em;">τ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.1132em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">c</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span><span class="tag"><span class="strut" style="height:2.1771em;vertical-align:-0.686em;"></span><span class="mord text"><span class="mord">(</span><span class="mord"><span class="mord">0.6</span></span><span class="mord">)</span></span></span></span></span></span></div>
+<p>The <strong>Child–Langmuir</strong> law (1913) gave the current of the vacuum tube, equation (<a href="#eq:child">0.4</a>). And <strong>Shockley</strong> (1949) derived the current of the p–n junction, the law of the semiconductor diode, which this course aims to understand and derive; <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>η</mi></mrow><annotation encoding="application/x-tex">\eta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">η</span></span></span></span> is an ideality factor close to 1 and <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>V</mi><mi>T</mi></msub></mrow><annotation encoding="application/x-tex">V_T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.2222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">T</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> the thermal voltage:</p>
+<div class="keyeq">
+<div class="eq"><span id="eq:shockley"></span><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable width="100%"><mtr><mtd width="50%"></mtd><mtd><mrow><mi>I</mi><mo>=</mo><msub><mi>I</mi><mi>s</mi></msub><mrow><mo fence="true">[</mo><mi>exp</mi><mo>⁡</mo><mtext> ⁣</mtext><mrow><mo fence="true">(</mo><mfrac><mi>V</mi><mrow><mi>η</mi><mtext> </mtext><msub><mi>V</mi><mi>T</mi></msub></mrow></mfrac><mo fence="true">)</mo></mrow><mo>−</mo><mn>1</mn><mo fence="true">]</mo></mrow><mo separator="true">,</mo><mspace width="2em"/><msub><mi>V</mi><mi>T</mi></msub><mo>=</mo><mfrac><mrow><mi>k</mi><mi>T</mi></mrow><mi>q</mi></mfrac><mo>≈</mo><mn>26</mn><mtext> mV</mtext></mrow></mtd><mtd width="50%"></mtd><mtd><mtext>(0.7)</mtext></mtd></mtr></mtable><annotation encoding="application/x-tex">I = I_s\left[\exp\!\left(\frac{V}{\eta\,V_T}\right) - 1\right],\qquad V_T = \frac{kT}{q} \approx 26~\text{mV} \tag{0.7}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.4em;vertical-align:-0.95em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0785em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">s</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size3">[</span></span><span class="mop">exp</span><span class="mspace" style="margin-right:-0.1667em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size3">(</span></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3603em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">η</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.2222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">T</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.22222em;">V</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.8804em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size3">)</span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord">1</span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size3">]</span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mpunct">,</span><span class="mspace" style="margin-right:2em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.2222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">T</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.2519em;vertical-align:-0.8804em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3714em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">q</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mord mathnormal" style="margin-right:0.13889em;">T</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.8804em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">26</span><span class="mspace nobreak"> </span><span class="mord text"><span class="mord">mV</span></span></span><span class="tag"><span class="strut" style="height:2.4em;vertical-align:-0.95em;"></span><span class="mord text"><span class="mord">(</span><span class="mord"><span class="mord">0.7</span></span><span class="mord">)</span></span></span></span></span></span></div>
+</div>
+<figure>
+<img src="img/ch0/f0_laws.svg" alt="" loading="lazy" style="width:98%" />
+<div id="fig:laws">
+
+</div>
+<figcaption><strong>Figure 0.5.</strong> Four laws, four steps in the understanding of electronic conduction.</figcaption>
+</figure>
+<h2 id="modern-devices-technologies-and-markets"><span class="secnum">0.7</span> Modern devices, technologies and markets</h2>
+<div id="sec:modern">
+
+</div>
+<div class="question"><p class="boxtitle">THE QUESTION</p>
+<p>Since 1947, which devices and which manufacturing techniques have built the industry, and how large has it become?</p>
+</div>
+<p>Tables <a href="#tab:devices">0.2</a> and <a href="#tab:techno">0.3</a> list the main <strong>devices</strong> and the main <strong>technologies</strong>, with their inventors. They are drawn up for this course from the historical record, as compiled in the references (Neamen; Sze and Lee).</p>
+<table style="width:33%;">
+<caption><strong>Table 0.2.</strong> Key semiconductor devices.</caption>
+<colgroup>
+<col />
+<col />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Year</th>
+<th style="text-align: left;">Device</th>
+<th style="text-align: left;">Inventors</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1874</td>
+<td style="text-align: left;">Metal–semiconductor rectifying contact</td>
+<td style="text-align: left;">F. Braun</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1907</td>
+<td style="text-align: left;">Electroluminescence of a crystal (first LED effect, SiC)</td>
+<td style="text-align: left;">H. J. Round</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1947</td>
+<td style="text-align: left;">Point-contact transistor</td>
+<td style="text-align: left;">J. Bardeen, W. Brattain</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1949</td>
+<td style="text-align: left;">p–n junction theory; junction (bipolar) transistor</td>
+<td style="text-align: left;">W. Shockley</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1954</td>
+<td style="text-align: left;">Silicon solar cell</td>
+<td style="text-align: left;">D. Chapin, C. Fuller, G. Pearson</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1957</td>
+<td style="text-align: left;">Heterojunction bipolar transistor (concept)</td>
+<td style="text-align: left;">H. Kroemer</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1958</td>
+<td style="text-align: left;">Tunnel diode</td>
+<td style="text-align: left;">L. Esaki</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1958–59</td>
+<td style="text-align: left;">Integrated circuit; monolithic planar IC</td>
+<td style="text-align: left;">J. Kilby; R. Noyce</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1959</td>
+<td style="text-align: left;">MOS field-effect transistor</td>
+<td style="text-align: left;">M. Atalla, D. Kahng</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1962</td>
+<td style="text-align: left;">Semiconductor laser; visible LED</td>
+<td style="text-align: left;">R. Hall et al.; N. Holonyak</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1963</td>
+<td style="text-align: left;">CMOS logic</td>
+<td style="text-align: left;">F. Wanlass, C. T. Sah</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1966</td>
+<td style="text-align: left;">One-transistor DRAM cell</td>
+<td style="text-align: left;">R. Dennard</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1967</td>
+<td style="text-align: left;">Floating-gate non-volatile memory</td>
+<td style="text-align: left;">D. Kahng, S. M. Sze</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1969</td>
+<td style="text-align: left;">Charge-coupled device (image sensor)</td>
+<td style="text-align: left;">W. Boyle, G. Smith</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1971</td>
+<td style="text-align: left;">Microprocessor (Intel 4004)</td>
+<td style="text-align: left;">M. Hoff, F. Faggin, S. Mazor, M. Shima</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1993</td>
+<td style="text-align: left;">Bright blue LED (GaN)</td>
+<td style="text-align: left;">S. Nakamura; I. Akasaki, H. Amano</td>
+</tr>
+</tbody>
+</table>
+<div id="tab:devices">
+
+</div>
+<table style="width:33%;">
+<caption><strong>Table 0.3.</strong> Key semiconductor technologies.</caption>
+<colgroup>
+<col />
+<col />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Year</th>
+<th style="text-align: left;">Technology</th>
+<th style="text-align: left;">Inventors / first users</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1918</td>
+<td style="text-align: left;">Czochralski crystal growth</td>
+<td style="text-align: left;">J. Czochralski</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1925</td>
+<td style="text-align: left;">Bridgman crystal growth</td>
+<td style="text-align: left;">P. W. Bridgman</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1952</td>
+<td style="text-align: left;">Zone refining (purification)</td>
+<td style="text-align: left;">W. G. Pfann</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1957</td>
+<td style="text-align: left;">Photoresist lithography</td>
+<td style="text-align: left;">J. Andrus</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1957</td>
+<td style="text-align: left;">Oxide masking for diffusion</td>
+<td style="text-align: left;">C. Frosch, L. Derick</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1957</td>
+<td style="text-align: left;">Epitaxial growth by chemical vapour deposition</td>
+<td style="text-align: left;">J. J. Sheftal et al.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1959</td>
+<td style="text-align: left;">Planar process</td>
+<td style="text-align: left;">J. Hoerni</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1969</td>
+<td style="text-align: left;">Self-aligned polysilicon gate</td>
+<td style="text-align: left;">R. Kerwin et al.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1969</td>
+<td style="text-align: left;">Metal-organic chemical vapour deposition (MOCVD)</td>
+<td style="text-align: left;">H. Manasevit</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1971</td>
+<td style="text-align: left;">Molecular-beam epitaxy</td>
+<td style="text-align: left;">A. Y. Cho</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1971</td>
+<td style="text-align: left;">Dry (plasma) etching</td>
+<td style="text-align: left;">S. Irving et al.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1989</td>
+<td style="text-align: left;">Chemical–mechanical polishing (CMP)</td>
+<td style="text-align: left;">B. Davari et al.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1997</td>
+<td style="text-align: left;">Copper interconnects in production</td>
+<td style="text-align: left;">IBM</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2011</td>
+<td style="text-align: left;">FinFET (tri-gate) transistors in production</td>
+<td style="text-align: left;">Intel</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2019</td>
+<td style="text-align: left;">EUV lithography in volume production</td>
+<td style="text-align: left;">ASML; TSMC, Samsung</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2022</td>
+<td style="text-align: left;">Gate-all-around (nanosheet) transistors in production</td>
+<td style="text-align: left;">Samsung</td>
+</tr>
+</tbody>
+</table>
+<div id="tab:techno">
+
+</div>
+<p><strong>The four building blocks.</strong> Behind this long list, very few structures are at work (Fig. <a href="#fig:blocks">0.6</a>). The <strong>metal–semiconductor</strong> contact (rectifying or ohmic), the <strong>p–n junction</strong>, the <strong>heterojunction</strong> between two different semiconductors, and the <strong>metal–oxide–semiconductor</strong> structure. Almost every device is one of them, or a combination: a bipolar transistor is two p–n junctions, a MOS transistor is a MOS structure with two junctions, a laser diode is a set of heterojunctions. This is why a course that understands the p–n junction already holds the key to most of the field.</p>
+<figure>
+<img src="img/ch0/f0_blocks.svg" alt="" loading="lazy" style="width:97%" />
+<div id="fig:blocks">
+
+</div>
+<figcaption><strong>Figure 0.6.</strong> The four building blocks of semiconductor devices.</figcaption>
+</figure>
+<p><strong>A market that entered every industry.</strong> Semiconductors are no longer confined to electronics: they are in cars, energy, medicine, industry and telecommunications. World sales have grown by a factor of about twelve in 34 years (Fig. <a href="#fig:market">0.7</a>).</p>
+<figure>
+<img src="img/ch0/f0_market.svg" alt="" loading="lazy" style="width:61%" />
+<div id="fig:market">
+
+</div>
+<figcaption><strong>Figure 0.7.</strong> World semiconductor sales (approximate values, WSTS and SIA data).</figcaption>
+</figure>
+<p><strong>Shrinking dimensions.</strong> In 1965 Gordon Moore observed that the number of components on a chip doubled every year; in 1975 he revised the pace to every two years. This <strong>Moore’s law</strong> is not a law of physics but an industrial roadmap, kept for half a century by reducing the dimensions: the minimum feature size went from about 10 µm in 1971 to a few tens of nanometres, and the capacity of a DRAM chip rose from 1 kbit to tens of gigabits (Fig. <a href="#fig:scaling">0.8</a>).</p>
+<figure>
+<img src="img/ch0/f0_scaling.svg" alt="" loading="lazy" style="width:73%" />
+<div id="fig:scaling">
+
+</div>
+<figcaption><strong>Figure 0.8.</strong> Minimum feature size (left) and DRAM capacity per chip (right) against year. After about 2010 the node names (dashed) no longer correspond to a physical length.</figcaption>
+</figure>
+<h2 id="how-a-chip-is-made"><span class="secnum">0.8</span> How a chip is made</h2>
+<div id="sec:chip">
+
+</div>
+<div class="question"><p class="boxtitle">THE QUESTION</p>
+<p>How do we go from sand to a chip carrying billions of transistors?</p>
+</div>
+<p>The flow is summarised in Fig. <a href="#fig:flow">0.9</a>. <strong>Silicon</strong> is extracted from quartz sand (SiO₂), then purified into <strong>polysilicon</strong> of extreme purity, about one foreign atom per billion. It is melted and pulled into a <strong>single crystal</strong> by the <strong>Czochralski</strong> method: a seed crystal is dipped into the melt and slowly raised while rotating, producing an <strong>ingot</strong> up to 300 mm in diameter. The ingot is sliced into <strong>wafers</strong>, which are polished to a mirror finish.</p>
+<p>Devices are then built <strong>at the surface</strong> of the wafer, layer by layer. The <strong>front end</strong> creates the transistors by repeating a few operations many times: <strong>oxidation</strong> (growing SiO₂), <strong>lithography</strong> (printing a pattern), <strong>etching</strong> (removing material where the pattern says), <strong>doping</strong> (by diffusion or ion implantation), <strong>deposition</strong> of thin films, and <strong>chemical–mechanical polishing</strong> to flatten the surface. The <strong>back end</strong> builds the copper <strong>interconnects</strong>, a dozen or more metal levels that wire the transistors together. Finally the chips are tested, cut and packaged.</p>
+<figure>
+<img src="img/ch0/f0_flow.svg" alt="" loading="lazy" style="width:92%" />
+<div id="fig:flow">
+
+</div>
+<figcaption><strong>Figure 0.9.</strong> From sand to chip: the main steps of fabrication.</figcaption>
+</figure>
+<p><strong>Lithography</strong> is the key step, because it fixes the dimensions (Fig. <a href="#fig:litho">0.10</a>). A light-sensitive <strong>resist</strong> is spread on the wafer and exposed through a <strong>mask</strong> carrying the pattern; the exposed (or unexposed) resist is dissolved; the pattern is then transferred into the layer underneath by <strong>etching</strong>, and the resist is removed. A chip needs several dozen such cycles.</p>
+<figure>
+<img src="img/ch0/f0_litho.svg" alt="" loading="lazy" style="width:96%" />
+<div id="fig:litho">
+
+</div>
+<figcaption><strong>Figure 0.10.</strong> A lithography cycle: oxidise, coat with resist, expose through a mask, develop, etch the oxide, remove the resist.</figcaption>
+</figure>
+<p>The smallest pattern that light can print is of the order of its wavelength divided by the numerical aperture of the optics. The industry has therefore moved to shorter and shorter wavelengths (Fig. <a href="#fig:euv">0.11</a>): mercury-lamp lines at 436 and 365 nm, then excimer lasers at 248 and 193 nm, then 193 nm light through water (immersion), and finally <strong>extreme ultraviolet (EUV) light at 13.5 nm</strong>, in volume production since 2019. EUV light is absorbed by air and by glass: it is produced by a tin plasma and focused by mirrors in vacuum. The only manufacturer of these machines is the Dutch company <strong>ASML</strong>.</p>
+<figure>
+<img src="img/ch0/f0_euv.svg" alt="" loading="lazy" style="width:62%" />
+<div id="fig:euv">
+
+</div>
+<figcaption><strong>Figure 0.11.</strong> Wavelength of the light used in production lithography.</figcaption>
+</figure>
+<div class="attention">
+<p><span class="boxtitle">BE AWARE OF…</span> <strong>Two points of accuracy.</strong> First, the EUV machine performs the <strong>lithography</strong>, i.e. the exposure of the pattern; <strong>etching</strong> is a separate step done afterwards in other equipment. Second, a name such as ‘3 nm’ designates a <strong>technology generation</strong> (a node), not a dimension of the transistor. In current ‘3 nm’ processes the contacted gate pitch is of the order of 45–50 nm and the tightest metal pitch of the order of 20–25 nm; no feature is 3 nm long. Since about 2010, node names have followed the historical sequence rather than a physical length.</p>
+</div>
+<h2 class="unnumbered" id="summary-essential-knowledge">Summary — essential knowledge<span id="summary"></span></h2>
+<div class="infobox">
+<p class="boxtitle">WHAT YOU MUST KNOW</p>
+<ul>
+<li><p><strong>Purpose.</strong> The course aims to understand devices; physics is the toolbox, used as far as the devices require.</p></li>
+<li><p><strong>One material.</strong> Analog, digital and power devices, and devices that rectify, amplify, interact with light or store, are all made of semiconductors: the semiconductor is the central subject.</p></li>
+<li><p><strong>Level.</strong> The course goes beneath the qualitative ‘cartoon’ to the mechanisms and their equations, the background an engineer needs.</p></li>
+<li><p><strong>Framework.</strong> Prototype devices: the PN junction and the bipolar transistor. The MOS effect is not treated but becomes accessible through the framework.</p></li>
+<li><p><strong>Cornerstones.</strong> Currents (Chapter 1), carrier concentrations (Chapters 2 and 3), continuity equation <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">∂</mi><mi>n</mi><mi mathvariant="normal">/</mi><mi mathvariant="normal">∂</mi><mi>t</mi><mo>=</mo><mo stretchy="false">(</mo><mn>1</mn><mi mathvariant="normal">/</mi><mi>q</mi><mo stretchy="false">)</mo><mtext> </mtext><mi mathvariant="normal">∂</mi><msub><mi>J</mi><mi>n</mi></msub><mi mathvariant="normal">/</mi><mi mathvariant="normal">∂</mi><mi>x</mi><mo>+</mo><mi>G</mi><mo>−</mo><mi>R</mi></mrow><annotation encoding="application/x-tex">\partial n/\partial t = (1/q)\,\partial J_n/\partial x + G - R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord" style="margin-right:0.05556em;">∂</span><span class="mord mathnormal">n</span><span class="mord">/</span><span class="mord" style="margin-right:0.05556em;">∂</span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1/</span><span class="mord mathnormal" style="margin-right:0.03588em;">q</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord" style="margin-right:0.05556em;">∂</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.09618em;">J</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0962em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">/</span><span class="mord" style="margin-right:0.05556em;">∂</span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">G</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span></span></span></span>, developed into the ambipolar equation (Chapter 4).</p></li>
+<li><p><strong>History.</strong> Edison lamp (1879) and Edison effect; Fleming diode (1904); de Forest triode (1906); Braun’s rectifying contact (1874) and the crystal detector; point-contact transistor (Bardeen, Brattain, 1947) and junction transistor (Shockley, 1949–1951); integrated circuit (Kilby 1958, Noyce 1959); MOS transistor (Atalla, Kahng, 1959).</p></li>
+<li><p><strong>Industry.</strong> Four building blocks (metal–semiconductor, p–n, heterojunction, MOS); sales multiplied by about 12 since 1990; feature sizes divided by more than 100 since 1971.</p></li>
+<li><p><strong>Fabrication.</strong> Sand → polysilicon → Czochralski ingot → wafers → front end (oxidation, lithography, etching, doping, deposition, CMP) → back end (interconnects) → chips. EUV lithography uses 13.5 nm light; node names are not lengths.</p></li>
+</ul>
+</div>
+<h2 class="unnumbered" id="questions-for-reflection">Questions for reflection</h2>
+<p>These questions check the ideas of the chapter; answers are given below.</p>
+<div class="olQ">
+<ol>
+<li><p>Why is a course on semiconductor devices mainly a course on semiconductors?</p></li>
+<li><p>What can an animated explanation of a transistor not tell an engineer?</p></li>
+<li><p>Why does the course study the PN junction and the bipolar transistor rather than a long list of devices? Why is the MOS transistor not a gap?</p></li>
+<li><p>Name the three cornerstones of the course and the chapter that delivers each.</p></li>
+<li><p>What asymmetry did Edison observe, and which device did Fleming build on it? What did de Forest add?</p></li>
+<li><p>The 1947 team was trying to build a field-effect device. What did they obtain instead, and when was the field effect finally realised?</p></li>
+<li><p>List four advantages of the transistor over the vacuum tube.</p></li>
+<li><p>What does an EUV machine do, and what does the name ‘3 nm node’ mean?</p></li>
+</ol>
+</div>
+<h2 class="unnumbered" id="answers">Answers<span id="answers"></span></h2><details class="answers"><summary>Show the answers (try the questions first)</summary>
+<div class="olQ">
+<ol>
+<li><p>Because devices of every family and function are made of the same class of materials; understanding the material and its few basic structures explains the devices.</p></li>
+<li><p>How much current, how fast, under which conditions the picture fails, and what to change to improve the device: these need the mechanisms and their equations.</p></li>
+<li><p>The course gives a framework; the PN junction contains all its ideas and the bipolar transistor is two junctions. The MOS transistor relies on the same carriers, currents and junctions, so it becomes accessible once the framework is mastered.</p></li>
+<li><p>Currents (Chapter 1); carrier concentrations (Chapters 2 and 3); the continuity equation, developed into the ambipolar equation (Chapters 1 and 4).</p></li>
+<li><p>A plate in the lamp collects current only when positive with respect to the hot filament (thermionic emission). Fleming built the vacuum diode (1904); de Forest added a grid (1906), giving the triode, an amplifier and a switch.</p></li>
+<li><p>They obtained bipolar action, minority-carrier injection, in the point-contact transistor (December 1947). The field effect was realised in 1959 by Atalla and Kahng with the MOS transistor.</p></li>
+<li><p>Smaller, cheaper, more reliable, more power-efficient (no heated filament), no warm-up, higher frequencies.</p></li>
+<li><p>It performs lithography with 13.5 nm light, i.e. prints the pattern; etching is a separate step. ‘3 nm’ is the name of a technology generation, not a physical dimension.</p></li>
+</ol>
+</div>
+</details><h2 class="unnumbered" id="references">References<span id="references"></span></h2>
+<ul>
+<li><p>D. A. Neamen, <em>Semiconductor Physics and Devices: Basic Principles</em>, 4th ed., McGraw-Hill, 2012 (main reference of the course; historical tables of devices and technologies).</p></li>
+<li><p>S. M. Sze and M. K. Lee, <em>Semiconductor Devices: Physics and Technology</em>, 3rd ed., Wiley, 2012.</p></li>
+<li><p>S. M. Sze and K. K. Ng, <em>Physics of Semiconductor Devices</em>, 3rd ed., Wiley, 2007.</p></li>
+<li><p>M. Riordan and L. Hoddeson, <em>Crystal Fire: The Invention of the Transistor and the Birth of the Information Age</em>, Norton, 1997.</p></li>
+<li><p>G. E. Moore, ‘Cramming more components onto integrated circuits’, <em>Electronics</em>, 38(8), 1965.</p></li>
+<li><p>World Semiconductor Trade Statistics (WSTS), market reports (www.wsts.org).</p></li>
+<li><p>Branch Education (video channel), animated explanations of electronic devices, recommended as a first contact.</p></li>
+</ul>
+<div class="remarque">
+<p><span class="boxtitle">CREDITS AND ACKNOWLEDGEMENTS</span> <strong>Images.</strong> The portraits and photographs of Figures <a href="#fig:timeline">0.4</a> and <a href="#fig:laws">0.5</a> are historical photographs; their sources must be confirmed before any public distribution of this text. All other figures and all tables were drawn for this course from published facts, cited above.</p>
+<p><strong>Preparation.</strong> This course was written by Dr Bassem CHAABANE with the assistance of Claude, an AI model by Anthropic, used for drafting, figures and consistency checks; the content and its choices are the author’s.</p>
+</div>
+<div class="infobox">
+<p><span class="boxtitle">WHERE THIS LEADS</span> Chapter 1 opens the toolbox with the first cornerstone: how carriers move, how currents are written, and how the continuity equation expresses the balance of carriers. The devices of this chapter will come back, explained, once the framework is in place.</p>
+</div>
+</article><nav class="pn"><span></span><a class="next" href="ch1.html">Chapter 1 · Transport Phenomena: Drift, Diffusion and Continuity →</a></nav></main></div>
+<footer class="foot"><span>ENISO 2026/2027</span><span>Dr Bassem CHAABANE</span><span>SEMICONDUCTOR DEVICES PHYSICS</span></footer>
+<div class="foot-more" lang="en">
+<p>© 2026 Bacem Chaabane · Educational content licensed under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">CC BY 4.0</a>. Exercises and figures marked “Adapted from” or “After” are based on problems and figures from the cited textbooks, which remain the property of their authors and publishers. Bundled KaTeX stylesheet and fonts: MIT licence.</p>
+<p>Feedback to the author: <a href="mailto:bacem.chaabane@eniso.u-sousse.tn?subject=%5BSemiconductor%20Devices%20Physics%5D%20Question%20%E2%80%93%20Chapter%200%20%C2%B7%20Why%20Semiconductor%20Devices%3F%20Goals%2C%20History%20and%20Technology&amp;body=Page%3A%20Chapter%200%20%C2%B7%20Why%20Semiconductor%20Devices%3F%20Goals%2C%20History%20and%20Technology%0D%0ASection%2C%20equation%2C%20figure%20or%20exercise%20number%3A%0D%0A%0D%0AMy%20question%3A%0D%0A%0D%0A">Question</a> · <a href="mailto:bacem.chaabane@eniso.u-sousse.tn?subject=%5BSemiconductor%20Devices%20Physics%5D%20Suggestion%20%E2%80%93%20Chapter%200%20%C2%B7%20Why%20Semiconductor%20Devices%3F%20Goals%2C%20History%20and%20Technology&amp;body=Page%3A%20Chapter%200%20%C2%B7%20Why%20Semiconductor%20Devices%3F%20Goals%2C%20History%20and%20Technology%0D%0ASection%20concerned%3A%0D%0A%0D%0AMy%20suggestion%3A%0D%0A%0D%0A">Suggestion</a> · <a href="mailto:bacem.chaabane@eniso.u-sousse.tn?subject=%5BSemiconductor%20Devices%20Physics%5D%20Error%20report%20%E2%80%93%20Chapter%200%20%C2%B7%20Why%20Semiconductor%20Devices%3F%20Goals%2C%20History%20and%20Technology&amp;body=Page%3A%20Chapter%200%20%C2%B7%20Why%20Semiconductor%20Devices%3F%20Goals%2C%20History%20and%20Technology%0D%0ASection%2C%20equation%2C%20figure%20or%20exercise%20number%3A%0D%0A%0D%0ADescription%20of%20the%20error%3A%0D%0A%0D%0ASuggested%20correction%20%28optional%29%3A%0D%0A%0D%0A">Report an error</a></p>
+</div>
+<script src="assets/site.js"></script>
+</body></html>
