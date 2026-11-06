@@ -10,10 +10,9 @@ An open course website on the physics of semiconductor devices, from the silicon
 The course follows one path, crystal → junction → transistor, in nine chapters (0 to 8) and two annexes. It is written for engineering students and is meant to be read, questioned and explored:
 
 - **Chapters 0–8 and Annexes A–B**: the full course text, with its boxes, equations, figures and worked examples.
-- **9 interactive figures ("Try it")**, placed at the section they illustrate: drift and diffusion, Fermi–Dirac statistics, the Fermi level against doping and temperature, the illuminated surface, the PN junction at equilibrium and under bias, junction capacitances, the base of the bipolar transistor, and output characteristics with the Early effect.
-- **Exercises**: nine sets of exercise statements, with hints and short answers folded.
-- **Data**: the reference data sheet and devices used in the exercises.
-- **Downloads**: the course and the exercises as PDF.
+- **Exercises**: 164 problems, one set per chapter and annex, with the 78 worked corrections folded under their problems.
+- **Interactives**: seven interactive figures (the junction forms, Boltzmann and the barrier, injection and current, the NPN transistor, the Early effect, light on and off at a surface, the two capacitances).
+- **Downloads**: the course, exercises and solutions as PDF, and the XeLaTeX sources of every chapter.
 
 The site is fully static (HTML, CSS and a little JavaScript). It needs no server, no account, and no internet connection once downloaded. Equations are pre-rendered. Visits are counted with [GoatCounter](https://www.goatcounter.com), a privacy-friendly statistics service that uses no cookies and collects no personal data; the site works fully without it.
 
