@@ -235,7 +235,8 @@
       '<span><svg viewBox="0 0 12 12" width="12"><circle cx="6" cy="6" r="3.6" fill="#fff" stroke="' + C.ho + '" stroke-width="1.6"/></svg>hole</span>' +
       '<span><svg viewBox="0 0 12 12" width="12"><rect x="1" y="1" width="10" height="10" fill="#fff" stroke="#c0762f"/><path d="M3.5 6h5M6 3.5v5" stroke="#c0762f" stroke-width="1.4"/></svg>donor ion</span>' +
       '<span><svg viewBox="0 0 12 12" width="12"><rect x="1" y="1" width="10" height="10" fill="#fff" stroke="#5a6f8a"/><path d="M3.5 6h5" stroke="#5a6f8a" stroke-width="1.4"/></svg>acceptor ion</span>' +
-      '<span><svg viewBox="0 0 18 12" width="18"><path d="M1 6h12" stroke="' + C.fld + '" stroke-width="1.6"/><path d="M17 6l-5 -3.5v7z" fill="' + C.fld + '"/></svg>field ℰ</span>';
+      '<span><svg viewBox="0 0 18 12" width="18"><path d="M1 6h12" stroke="' + C.fld + '" stroke-width="1.6"/><path d="M17 6l-5 -3.5v7z" fill="' + C.fld + '"/></svg>field ℰ</span>' +
+      '<span><svg viewBox="0 0 12 12" width="12"><path d="M2 2l8 8M10 2l-8 8" stroke="#8a1c1c" stroke-width="1.8" stroke-linecap="round"/></svg>recombination</span>';
 
     sV.value = st.vbe; sC.value = st.vcb;
     // Handoff 4: regime buttons, carrier Speed, and a synchronised copy of the controls under each panel
@@ -311,8 +312,8 @@
         svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
         svg.setAttribute('height', h);
       });
-      svgA.innerHTML = '<g data-g="s"></g><g data-g="p"></g>';
-      gStatic = svgA.querySelector('[data-g=s]'); gPart = svgA.querySelector('[data-g=p]');
+      svgA.innerHTML = '<g data-g="s"></g><g data-g="p"></g><g data-g="f"></g>';
+      gStatic = svgA.querySelector('[data-g=s]'); gPart = svgA.querySelector('[data-g=p]'); gFlash = svgA.querySelector('[data-g=f]'); flashes = [];
       pool = []; parts = [];
       var html = '';
       for (var i = 0; i < 260; i++) html += '<circle r="3" cx="-20" cy="-20" visibility="hidden"/>';
@@ -320,7 +321,7 @@
       pool = Array.prototype.slice.call(gPart.childNodes);
       dirty = true;
     }
-    var gStatic, gPart, pool = [], parts = [], dirty = true;
+    var gStatic, gPart, gFlash, flashes = [], pool = [], parts = [], dirty = true;
 
     /* shared x geometry for (a) and (b) */
     function geo(w, vbe, vcb, m) {
@@ -411,7 +412,7 @@
     }
 
     /* particles */
-    var spawnAcc = { e: 0, hE: 0, hC: 0 };
+    var spawnAcc = { e: 0, hE: 0, hC: 0, hB: 0 };
     function stepParticles(dt, m, g, vbe) {
       if (!g) return;
       var y0 = SY0, H = SH;
@@ -421,17 +422,23 @@
         var rE = clamp(Math.abs(m.In) * k, 0, 80);
         var rH = clamp(Math.max(m.IpE, 0) * k * 10, 0, 40);
         var rC = clamp(Math.max(m.IpC, 0) * k * 10, 0, 22);
-        spawnAcc.e += rE * dt; spawnAcc.hE += rH * dt; spawnAcc.hC += rC * dt;
+        /* base recombination current I_rB = I_rF (e^{V_BE/V_T} - 1) (eq. IrB), holes x10 like the others */
+        var rB = clamp(Math.max(IrF * (Math.exp(vbe / VT) - 1), 0) * k * 10, 0, 12);
+        spawnAcc.e += rE * dt; spawnAcc.hE += rH * dt; spawnAcc.hC += rC * dt; spawnAcc.hB += rB * dt;
         var dir = m.In >= 0 ? 1 : -1;
         while (spawnAcc.e >= 1) { spawnAcc.e -= 1; spawn('e', dir); }
         while (spawnAcc.hE >= 1) { spawnAcc.hE -= 1; spawn('hE', 0); }
         while (spawnAcc.hC >= 1) { spawnAcc.hC -= 1; spawn('hC', 0); }
+        while (spawnAcc.hB >= 1) { spawnAcc.hB -= 1; spawn('hB', 0); }
       }
       function spawn(kind, dir) {
         if (parts.length >= pool.length) return;
         var p = { kind: kind, dir: dir, v: 0.12 + Math.random() * 0.76, age: 0 };
         if (kind === 'e') { p.x = dir > 0 ? g.e1 - Math.random() * (g.e1 - g.x0) * 0.35 : g.e5 - Math.random() * (g.e5 - g.e4) * 0.3; }
-        else { p.x = (g.e2 + g.e3) / 2 + (Math.random() - 0.5) * (g.e3 - g.e2) * 0.4; p.v = 0.92 + Math.random() * 0.05; p.tx = kind === 'hE' ? -1 : 1; }
+        else {
+          p.x = (g.e2 + g.e3) / 2 + (Math.random() - 0.5) * (g.e3 - g.e2) * 0.4; p.v = 0.92 + Math.random() * 0.05; p.tx = kind === 'hE' ? -1 : kind === 'hC' ? 1 : 0;
+          p.depth = 0.25 + Math.random() * 0.55; /* how far into E (or C) it goes before it recombines with a majority electron */
+        }
         parts.push(p);
       }
       var Pw = g.x1 - g.x0, alive = [];
@@ -442,21 +449,44 @@
           if (p.kind === 'e') {
             var sp;
             if (p.x < g.e1) sp = 0.22; else if (p.x < g.e2) sp = 0.35; else if (p.x < g.e3) { var sb = (p.x - g.e2) / Math.max(1, g.e3 - g.e2); sb = p.dir > 0 ? sb : 1 - sb; sp = 0.06 / Math.max(0.15, 1 - 0.85 * sb); } else if (p.x < g.e4) sp = 0.5; else sp = 0.2;
-            p.x += p.dir * sp * Pw * dt * (0.8 + 0.4 * Math.random());
+            if (p.dead) continue;
+            if (!p.taken) p.x += p.dir * sp * Pw * dt * (0.8 + 0.4 * Math.random());
             if (p.x >= g.e2 && p.x <= g.e3) p.v += (Math.random() - 0.5) * 1.4 * dt; /* diffusion jitter */
             p.v = clamp(p.v, 0.08, 0.92);
             if (p.x > g.x1 || p.x < g.x0) continue;
           } else {
             /* holes: rise from the base contact, then drift sideways into E or C, and recombine there */
             if (p.v > 0.55) p.v -= 0.9 * dt; else { p.v += (Math.random() - 0.5) * 0.8 * dt; p.v = clamp(p.v, 0.15, 0.8); p.x += p.tx * (p.x > g.e2 && p.x < g.e3 ? 0.08 : (p.x > g.e1 && p.x < g.e4 ? 0.3 : (p.kind === 'hC' ? 0.12 : 0.05))) * Pw * dt; }
-            if (p.kind === 'hE' && p.x < g.e1 - (g.e1 - g.x0) * 0.8) continue;
-            if (p.kind === 'hC' && p.x > g.e4 + (g.e5 - g.e4) * 0.7) continue;
-            if (p.age > 14) continue;
+            if (p.kind === 'hB') { /* base recombination: the hole meets an electron crossing the base */
+              if (!p.mate || p.mate.dead) {
+                p.mate = null; var bd = 1e9;
+                for (var j2 = 0; j2 < parts.length; j2++) { var e2 = parts[j2]; if (e2.kind !== 'e' || e2.taken || e2.dead || e2.x < g.e2 || e2.x > g.e3) continue; var dd = Math.abs(e2.x - p.x); if (dd < bd) { bd = dd; p.mate = e2; } }
+                if (p.mate) p.mate.taken = true;
+              }
+              if (p.mate && p.v <= 0.6) {
+                var mx = p.mate.x - p.x, mv = p.mate.v - p.v;
+                p.x += clamp(mx, -1, 1) * Math.min(Math.abs(mx), 0.25 * Pw * dt); p.v += clamp(mv, -1, 1) * Math.min(Math.abs(mv), 1.2 * dt);
+                p.mate.x -= mx * 0.5 * Math.min(1, 6 * dt); /* the electron is slowed down: it waits for the hole */
+                if (Math.abs(mx) < 4 && Math.abs(mv) < 0.05) { flashes.push({ x: p.x, v: p.v, t: 0 }); p.mate.dead = true; continue; }
+              }
+            }
+            if (p.kind === 'hE' && p.x < g.e1 - (g.e1 - g.x0) * p.depth) { flashes.push({ x: p.x, v: p.v, t: 0 }); continue; }
+            if (p.kind === 'hC' && p.x > g.e4 + (g.e5 - g.e4) * Math.min(p.depth, 0.7)) { flashes.push({ x: p.x, v: p.v, t: 0 }); continue; }
+            if (p.age > 14) { if (p.mate) p.mate.taken = false; continue; }
           }
         }
         alive.push(p);
       }
       parts = alive;
+      /* recombination marks (red x): full for 0.5, fading until 1.3 (model time) */
+      var fo = '';
+      for (var f = 0; f < flashes.length; f++) {
+        var F2 = flashes[f]; if (st.flow) F2.t += dt;
+        var kk = F2.t < 0.5 ? 1 : 1 - (F2.t - 0.5) / 0.8, rr = 4.5, fx = F2.x, fy = y0 + 6 + F2.v * (H - 12);
+        fo += '<path d="M' + (fx - rr).toFixed(1) + ' ' + (fy - rr).toFixed(1) + 'l' + 2 * rr + ' ' + 2 * rr + 'M' + (fx + rr).toFixed(1) + ' ' + (fy - rr).toFixed(1) + 'l' + (-2 * rr) + ' ' + 2 * rr + '" stroke="#8a1c1c" stroke-width="2.2" stroke-linecap="round" opacity="' + Math.max(0, kk).toFixed(2) + '"/>';
+      }
+      flashes = flashes.filter(function (F3) { return F3.t < 1.3; });
+      if (gFlash) gFlash.innerHTML = fo;
       for (var j = 0; j < pool.length; j++) {
         var c = pool[j];
         if (j < parts.length) {
