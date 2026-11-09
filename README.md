@@ -11,7 +11,7 @@ The course follows one path, crystal → junction → transistor, in nine chapte
 
 - **Chapters 0–8 and Annexes A–B**: the full course text, with its boxes, equations, figures and worked examples.
 - **Exercises**: 164 problems, one set per chapter and annex, with the 78 worked corrections folded under their problems.
-- **Interactives**: seven interactive figures (the junction forms, Boltzmann and the barrier, injection and current, the NPN transistor, the Early effect, light on and off at a surface, the two capacitances).
+- **Interactives**: six interactive figures (the junction forms, injection and current, the NPN transistor, the Early effect, light on and off at a surface, the two capacitances).
 - **Downloads**: the course, exercises and solutions as PDF.
 
 The site is fully static (HTML, CSS and a little JavaScript). It needs no server, no account, and no internet connection once downloaded. Equations are pre-rendered. Visits are counted with [GoatCounter](https://www.goatcounter.com), a privacy-friendly statistics service that uses no cookies and collects no personal data; the site works fully without it.

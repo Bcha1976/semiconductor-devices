@@ -1,13 +1,17 @@
 /* Interactive module "junction": The PN junction forms, a thought experiment (Ch5).
    Physics: depletion approximation (Ch5 eqs 5.15-5.19) with the barrier phi built so far in place of V_d;
    phi(t) evolves as d phi/dt ~ [diffusion over the barrier - minority drift] (Ch5 sec. 5.2-5.4, Ch6 four-flux picture),
-   converging to V_d = (kT/q) ln(N_A N_D / n_i^2) (eq 5.13). Time is qualitative (logarithmic). */
+   converging to V_d = (kT/q) ln(N_A N_D / n_i^2) (eq 5.13). Time is qualitative (logarithmic).
+   Version 3 prototype (CHANGES_REQUEST B1, 2026-11-08): equilibrium only (no regime buttons, no bias), panel (e) removed;
+   V(x) and the bands follow the approved band rule (gate 1G, option 3): two parabolas from Poisson on the charge as panel (c)
+   draws it (stretched P block, same charge), continuous slope at x = 0, true total step q*phi, true SCR edges and readouts;
+   quasi-Fermi levels flat across the SCR (no joining line); Boltzmann tails and the barrier drawn inside the band diagram. */
 (function () {
   'use strict';
   var ID = 'junction';
   var q = 1.602e-19, EPS = 11.7 * 8.854e-14, NI = 1e10, VT = 0.0259, EG = 1.12; // course values (Ch5 Table 5.1: kT/q = 25.9 mV)
-  var XMIN = -0.3, XMAX = 0.5; // um, shared x axis of the physics panels
-  var VB_MIN = -1, VB_MAX = 0.6; // V, bias applied after formation (Handoff 4)
+  var XMIN = -0.3, XMAX = 0.5; // um, shared x axis of the physics panels (XMIN = -0.45 for the symmetric junction, set in layout)
+  var KTD = 10 * VT; // drawn kT of the Boltzmann tails (x10, pedagogical, as in Figs 5.6 and 6.2)
   var CARRIER = 0.3, PACE = 0.6; // carriers 3.3x slower than in v2, formation pace 0.6 (Handoff 4)
   var LAMBDA = 0.06; // um, drawn decay length of the carriers that spill over (pedagogical, not to scale)
   var S_APART = 2.2, S_FORM = 22, S_HOLD = 1.5, S_END = S_APART + S_FORM + S_HOLD;
@@ -21,10 +25,10 @@
   var STAGES = [
     { f: -1, name: 'Apart', watch: 'Two neutral pieces, apart. N is full of electrons, P full of holes; their Fermi levels differ by q<i>V</i><sub>d</sub>. Nothing flows, no field.' },
     { f: 0, name: 'Contact', watch: 'Contact (t = 0): huge density gradients and no field yet. Diffusion is the only motion: holes P → N, electrons N → P.' },
-    { f: 0.04, name: 'Diffusion & recombination', watch: 'Carriers that cross recombine (×) on the far side, so they are not replaced. Watch the ions they leave behind.' },
+    { f: 0.04, name: 'Diffusion & recombination', watch: 'Carriers that cross recombine on the far side (red dot that shrinks away), so they are not replaced. Watch the ions they leave behind.' },
     { f: 0.18, name: 'Ions uncovered', watch: 'Uncovered ions: − acceptors on P, + donors on N, equal charges. They create a field ℰ pointing from N to P.' },
-    { f: 0.45, name: 'Field builds', watch: 'The field grows with the charge: ρ blocks widen, the ℰ triangle and V(x) grow, the bands bend and the two E<sub>F</sub> approach.' },
-    { f: 0.8, name: 'Drift grows', watch: 'Drift pushes carriers back; diffusion over the barrier falls as e<sup>−qφ/kT</sup>. The net crossing flux shrinks.' },
+    { f: 0.45, name: 'Field builds', watch: 'The field grows with the charge: ρ blocks widen, the ℰ triangle and V(x) grow, the bands bend and the gap between E<sub>Fn</sub> and E<sub>Fp</sub> closes.' },
+    { f: 0.8, name: 'Drift grows', watch: 'Drift pushes carriers back; only the dark part of each Boltzmann tail, a fraction e<sup>−qφ/kT</sup>, can still climb the step. The net crossing flux shrinks.' },
     { f: 1, name: 'Equilibrium', watch: 'Equilibrium: drift = diffusion for each carrier, net current zero. E<sub>F</sub> is flat, the step is q<i>V</i><sub>d</sub>.' }
   ];
 
@@ -150,7 +154,7 @@
     root.classList.add('ix-' + ID);
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    var st = { preset: 0, s: 0, playing: !reduce, speed: 1, V: 0, model: null, last: 0, removed: 0, events: [], flashes: [], alt: 0, stage: -2 };
+    var st = { preset: 0, s: 0, playing: !reduce, speed: 1, model: null, last: 0, removed: 0, events: [], flashes: [], alt: 0, stage: -2 };
     st.model = makeModel(PRESETS[0]);
 
     // --- DOM ---
@@ -175,41 +179,25 @@
       '<span><svg width="16" height="14"><rect x="2" y="2" width="11" height="11" fill="#fff" stroke="' + COL.accep + '" stroke-width="1.5"/><line x1="4.5" y1="7.5" x2="10.5" y2="7.5" stroke="' + COL.accep + '" stroke-width="1.6"/></svg>acceptor ion N<sub>A</sub><sup>−</sup></span>' +
       '<span><svg width="16" height="14"><rect x="2" y="2" width="11" height="11" fill="#fff" stroke="' + COL.donor + '" stroke-width="1.5"/><path d="M4.5 7.5h6M7.5 4.5v6" stroke="' + COL.donor + '" stroke-width="1.6"/></svg>donor ion N<sub>D</sub><sup>+</sup></span>' +
       '<span><svg width="22" height="14"><path d="M20 7H6" stroke="' + COL.fld + '" stroke-width="2"/><path d="M2 7l6-4v8z" fill="' + COL.fld + '"/></svg>field ℰ</span>' +
-      '<span><svg width="16" height="14"><path d="M3 3l9 9M12 3l-9 9" stroke="#8a1c1c" stroke-width="1.8"/></svg>recombination</span>';
+      '<span><svg width="14" height="14"><circle cx="7" cy="7" r="4.5" fill="#A33A3A"/></svg>recombination (the pair vanishes)</span>' +
+      '<span><svg width="22" height="14"><path d="M20 13V1C17 6 9 9 3 12L20 13z" fill="#c9d6ec" stroke="' + COL.el + '" stroke-width="1"/><path d="M20 5.5V1C19 3 18 4.5 16.5 6z" fill="' + COL.el + '"/></svg>Boltzmann tail in (d): dark part can climb the step</span>';
     root.appendChild(legend);
     var wrap = document.createElement('div'); wrap.className = 'ixj-svgwrap'; root.appendChild(wrap);
     var cap = document.createElement('div'); cap.className = 'ixj-cap'; root.appendChild(cap);
 
     var btnPlay = top.querySelector('.play');
     var tsl = top.querySelector('[data-a=time]'), tlab = top.querySelector('.tl');
-    btnPlay.addEventListener('click', function () { st.playing = !st.playing; if (st.playing && st.s >= S_END - 0.01) { st.V = 0; restart(); } syncButtons(); });
-    top.querySelector('[data-a=step]').addEventListener('click', function () { st.playing = false; st.V = 0; stepStage(); syncButtons(); });
-    top.querySelector('[data-a=reset]').addEventListener('click', function () { st.V = 0; restart(); st.playing = false; syncButtons(); frame(true); });
-    tsl.addEventListener('input', function () { st.V = 0; setS(+tsl.value / 1000 * S_END, true); frame(true); });
+    btnPlay.addEventListener('click', function () { st.playing = !st.playing; if (st.playing && st.s >= S_END - 0.01) restart(); syncButtons(); });
+    top.querySelector('[data-a=step]').addEventListener('click', function () { st.playing = false; stepStage(); syncButtons(); });
+    top.querySelector('[data-a=reset]').addEventListener('click', function () { restart(); st.playing = false; syncButtons(); frame(true); });
+    tsl.addEventListener('input', function () { setS(+tsl.value / 1000 * S_END, true); frame(true); });
 
-    // --- Handoff 4: bias after formation, regime buttons and Speed, one synchronised copy next to each panel ---
+    // --- B1 (Version 3 prototype): equilibrium only. The only interactive without regime buttons: the strip next to
+    // each panel carries the carrier Speed alone; the bias story is told by "Injection and current" (Ch6) ---
     var K = window.IX._kit, ctl = null;
-    function formed() { return st.s >= S_APART + S_FORM; }
-    function setBias(v) { // the junction is formed first, then V is applied (V on P, N grounded)
-      v = clamp(Math.round(v * 100) / 100, VB_MIN, VB_MAX);
-      var was = formed();
-      st.V = v; st.playing = false;
-      if (!was) st.s = S_END;
-      rebuildCarriers(); syncButtons(); frame(true);
-    }
     if (K) {
-      ctl = K.controls({
-        sliders: [{ key: 'V', label: 'bias <i>V</i>', aria: 'Bias V applied to P after the junction has formed (N grounded)', title: 'Bias applied to P once the junction has formed (N grounded)',
-          min: VB_MIN, max: VB_MAX, step: 0.01, get: function () { return st.V; }, set: setBias,
-          fmt: function (v) { return (v > 0.004 ? '+' : v < -0.004 ? '−' : '') + Math.abs(v).toFixed(2) + ' V'; } }],
-        regimes: [
-          { label: 'Forward', title: 'Formed junction under forward bias V = +0.6 V: the barrier falls to V_d − V, diffusion beats drift', apply: function () { setBias(0.6); }, is: function () { return formed() && st.V === 0.6; } },
-          { label: 'Equilibrium (0 V)', title: 'The junction fully formed, at equilibrium (V = 0): diffusion = drift, E_F flat', apply: function () { setBias(0); }, is: function () { return formed() && st.V === 0; } },
-          { label: 'Reverse', title: 'Formed junction under reverse bias V = −1 V (the SCR then still fits in the drawn x range): the barrier rises to V_d + 1 V', apply: function () { setBias(-1); }, is: function () { return formed() && st.V === -1; } }
-        ],
-        speed: { get: function () { return st.speed; }, set: function (v) { st.speed = v; } }
-      });
-      top.appendChild(ctl.strip({ top: true, sliders: true }));
+      ctl = K.controls({ speed: { get: function () { return st.speed; }, set: function (v) { st.speed = v; } } });
+      top.appendChild(ctl.strip({ top: true }));
     }
 
     function syncButtons() {
@@ -224,7 +212,9 @@
       var w = Math.max(300, Math.round(wrap.clientWidth || root.clientWidth || 760));
       var phone = w < 560;
       L.w = w; L.phone = phone;
-      L.ML = phone ? 40 : 66; L.MR = phone ? 10 : 16;
+      L.ML = phone ? 40 : 66; L.MR = phone ? 30 : 38; // right margin: the N-side Fermi level labels of (d)
+      // the symmetric junction has a wide P part of the SCR (no stretch): give its neutral P region the same room
+      XMIN = st.model.NA / st.model.ND > 1.5 ? -0.3 : -0.45;
       L.PW = w - L.ML - L.MR;
       L.ppu = L.PW / (XMAX - XMIN); // px per um
       L.J = L.ML + (0 - XMIN) * L.ppu;
@@ -239,8 +229,8 @@
       y += 4 + TS; L.rho = { top: y, h: hr }; y += hr + TS + 4;
       L.E = { top: y, h: hc }; y += hc + TS + 4;
       L.V = { top: y, h: hc }; y += hc + TS + 8;
-      // (d) bands
-      L.bd = { top: y, h: phone ? 170 : 200 }; y += L.bd.h + TS + 8;
+      // (d) bands, with the Boltzmann tails, the barrier and the carriers crossing it
+      L.bd = { top: y, h: phone ? 230 : 270 }; y += L.bd.h + TS + 8;
       // (e) densities
       L.n = { top: y, h: phone ? 100 : 118 }; y += L.n.h;
       L.axis = y; y += 34;
@@ -255,6 +245,19 @@
     }
     function xpx(xum) { return L.J + xum * L.ppu * (xum < 0 ? L.kP : 1); } // stretched P side (L.kP), N side to scale
     function xLeft() { return XMIN / L.kP; } // true position (um) of the left edge of the panels
+    // Band rule (gate 1G, option 3): the potential drawn in every panel is Poisson applied to the charge as panel (c) draws it.
+    // P block: rc*qN_D high over the stretched width kP*|x_p| (same charge as -qN_A over |x_p|); N block: qN_D over x_n.
+    // Two parabolas in drawn x, zero slope at the SCR edges, continuous slope at x = 0, total step = phi (true).
+    // The P share of the step is the drawn width share kP|x_p|/(kP|x_p| + x_n) = 1/(1 + rc) instead of N_D/(N_A + N_D).
+    function Vdr(g, xum) { // xum: true position (um); returns V in volts, N side grounded, V_P = -phi
+      var wP = L.kP * (-g.xp * 1e4), wN = g.xn * 1e4, Wd = wP + wN;
+      if (!(Wd > 0)) return xum < 0 ? -g.phi : 0;
+      var u = xum < 0 ? xum * L.kP : xum;
+      if (u <= -wP) return -g.phi;
+      if (u >= wN) return 0;
+      if (u < 0) return g.phi * (u + wP) * (u + wP) / (wP * Wd) - g.phi;
+      return -g.phi * (wN - u) * (wN - u) / (wN * Wd);
+    }
 
     function buildSVG() {
       var w = L.w, h = L.h, s = '';
@@ -265,7 +268,8 @@
       svg = wrap.firstChild;
       gDyn = svg.querySelector('.dyn');
       if (window.IX._kit && ctl) window.IX._kit.slice(svg, [L.rho.top - 20, L.bd.top - 15, L.n.top - 16], function (k) {
-        return ctl.strip({ inside: true, tag: ['(a)–(b)', '(c)', '(d)', '(e)'][k] });
+        // Speed sits at the top and under the panels with moving carriers only: (a)-(b) and (d) (author, 2026-11-08)
+        return k === 0 || k === 2 ? ctl.strip({ inside: true, tag: ['(a)–(b)', '(c)', '(d)', '(e)'][k] }) : null;
       });
     }
     var uid = Math.random().toString(36).slice(2, 8);
@@ -293,7 +297,46 @@
       for (i = 0; i < ionsP.length; i++) if (ionsP[i].x > L.J - xppx) kp++;
       return Math.round((kn + kp) / 2);
     }
+    // ---- carriers crossing the step in the band diagram (d), as in the Boltzmann balance panel:
+    // k0 electrons of N climbing over the step (diffusion, N -> P, constant energy above the top of the step)
+    // k1 minority electrons of P sliding down E_C (drift, P -> N)
+    // k2 holes of P going under the step (diffusion, P -> N, constant energy below the bottom of the step)
+    // k3 minority holes of N sliding up E_V (drift, N -> P)
+    // Rates: drift r0 (1 - e^{-phi/V_T}); diffusion r0 x (diffusion/drift of panel (b), log-compressed above 1):
+    // equal at equilibrium, so as many carriers cross each way and the net current is zero.
+    var BR0 = 0.55, BV = 0.07; // spawns per second per kind, speed in drawn um per second (both at Speed 1x)
+    function bandRates(phi) {
+      var m = st.model, dr = BR0 * m.drift(phi), ratio = m.diff(phi) / Math.max(m.drift(phi), 1e-300);
+      var df = ratio <= 1 ? dr * ratio : dr * Math.min(1 + 1.5 * Math.log10(ratio), 17);
+      if (st.s >= S_APART + S_FORM) df = dr; // formed: exact balance
+      return [df, dr, df, dr];
+    }
+    function bandSpawn(k, g) {
+      var r = Math.random(), uP = L.kP * g.xp * 1e4, uN = g.xn * 1e4, p = { k: k, a: 0 };
+      var Eoff = 0.02 + KTD * 0.9 * (-Math.log(1 - 0.85 * Math.random())) * 0.6;
+      if (k === 0) { p.u = XMAX - 0.02 - 0.1 * r; p.Eoff = Eoff; p.dir = -1; }
+      else if (k === 1) { p.u = XMIN + 0.03 + Math.max(0, uP - 0.02 - XMIN - 0.03) * r; p.dE = 0.04 + 0.08 * Math.random(); p.dir = 1; }
+      else if (k === 2) { p.u = XMIN + 0.02 + 0.1 * r; p.Eoff = Eoff; p.dir = 1; }
+      else { p.u = uN + 0.02 + Math.max(0, XMAX - 0.05 - uN - 0.02) * r; p.dE = 0.04 + 0.08 * Math.random(); p.dir = -1; }
+      st.bp.push(p);
+    }
+    function bandStep(dt) {
+      if (!st.bp) { st.bp = []; st.bacc = [0, 0, 0, 0]; }
+      if (st.s < S_APART) { st.bp = []; return; }
+      var g = st.model.geom(curPhi()), R = bandRates(g.phi), i;
+      for (i = 0; i < 4; i++) {
+        st.bacc[i] += R[i] * dt;
+        while (st.bacc[i] >= 1) { st.bacc[i] -= 1; if (st.bp.length < 60) bandSpawn(i, g); }
+      }
+      var uP = L.kP * g.xp * 1e4, uN = g.xn * 1e4;
+      st.bp.forEach(function (p) {
+        var inS = p.u > uP && p.u < uN;
+        p.u += p.dir * BV * dt * ((p.k === 1 || p.k === 3) && inS ? 1.6 : 1); p.a += dt;
+      });
+      st.bp = st.bp.filter(function (p) { return p.u > XMIN + 0.005 && p.u < XMAX - 0.005; });
+    }
     function rebuildCarriers() {
+      st.bp = []; st.bacc = [0, 0, 0, 0];
       var g = st.model.geom(curPhi());
       var R = st.s > S_APART ? targetRemoved(g) : 0;
       carriers = []; st.events = []; st.flashes = [];
@@ -310,7 +353,7 @@
 
     // --- time / state ---
     function curFrac() { return clamp((st.s - S_APART) / S_FORM, 0, 1); }
-    function curPhi() { if (st.s >= S_APART + S_FORM && st.V) return Math.max(st.model.Vd - st.V, 0.02); return st.s <= S_APART ? 0 : st.model.phiAtFrac(curFrac()); }
+    function curPhi() { return st.s <= S_APART ? 0 : st.model.phiAtFrac(curFrac()); }
     function gapNow() { // pieces slide together before contact
       if (st.s >= S_APART) return 0;
       var a = clamp((st.s - 0.6) / (S_APART - 0.6), 0, 1);
@@ -343,7 +386,7 @@
       frame(true);
     }
     function setPreset(i) {
-      st.preset = i; st.model = makeModel(PRESETS[i]); st.V = 0;
+      st.preset = i; st.model = makeModel(PRESETS[i]);
       layout(); setCaption(); restart(); syncButtons(); frame(true);
     }
 
@@ -367,13 +410,6 @@
           pending = st.events.length;
         }
       }
-      // forward bias: carriers injected over the lowered barrier (cartoon of the forward current)
-      if (st.s >= S_APART + S_FORM && st.V > 0) {
-        var nInj = 0;
-        for (i = 0; i < carriers.length; i++) if (carriers[i].inj && !carriers[i].dead) nInj++;
-        st.injAcc = (st.injAcc || 0) + dt * 10 * Math.pow(clamp((st.V - 0.2) / 0.4, 0, 1), 2);
-        while (st.injAcc >= 1) { st.injAcc -= 1; if (nInj < (L.phone ? 5 : 8) && launchInjection(eN, eP)) nInj++; }
-      } else st.injAcc = 0;
       for (i = 0; i < carriers.length; i++) {
         c = carriers[i];
         if (c.st === 0) { // free random walk
@@ -394,13 +430,10 @@
           var v = 70;
           if (d < 4) {
             c.st = 2; p.st = 2; st.flashes.push({ x: (c.x + p.x) / 2, y: (c.y + p.y) / 2, t: 0 }); c.dead = p.dead = true;
-            if (c.inj) { // forward current: the contacts replace the pair that recombined
-              carriers.push(newCarrier('e', xR - 2 - Math.random() * 12));
-              carriers.push(newCarrier('h', xL + 2 + Math.random() * 12));
-            } else st.removed++;
+            st.removed++;
           }
           else { c.x += dx / d * v * dt; c.y += dy / d * v * dt; }
-        } else if (c.st === 4) { // injected under forward bias: crosses the SCR, then looks for a partner
+        } else if (c.st === 4) { // crosses the SCR by diffusion, then looks for a partner on the far side
           var dir = c.tx > c.x ? 1 : -1;
           c.x += dir * (c.ev ? 120 : 180) * dt; c.y += (Math.random() - 0.5) * 60 * dt;
           if ((c.tx - c.x) * dir <= 0) {
@@ -409,7 +442,7 @@
               var o2 = carriers[q2]; if (o2.st !== 0 || o2.t !== other) continue;
               var dd = Math.abs(o2.x - c.x) + 0.5 * Math.abs(o2.y - c.y); if (dd < bd) { bd = dd; bestP = o2; }
             }
-            if (bestP) { c.st = 1; c.partner = bestP; bestP.st = 3; } else { c.st = 0; c.inj = false; if (c.ev) { c.ev = false; st.events = st.events.filter(function (e) { return e.a !== c; }); } }
+            if (bestP) { c.st = 1; c.partner = bestP; bestP.st = 3; } else { c.st = 0; if (c.ev) { c.ev = false; st.events = st.events.filter(function (e) { return e.a !== c; }); } }
           }
         } else if (c.st === 3) { // partner waiting: slow jitter
           c.x += (Math.random() - 0.5) * 6 * dt; c.y += (Math.random() - 0.5) * 6 * dt;
@@ -427,18 +460,6 @@
       st.events = st.events.filter(function (e) { return !e.dead; });
       for (i = 0; i < st.flashes.length; i++) st.flashes[i].t += dt;
       st.flashes = st.flashes.filter(function (f) { return f.t < 1.4; });
-    }
-    function launchInjection(eN, eP) {
-      // holes into N and electrons into P, in the ratio N_A : N_D as drawn in the cartoon (L.rc)
-      var mover = Math.random() < L.rc / (1 + L.rc) ? 'h' : 'e', best = null, i, c;
-      for (i = 0; i < carriers.length; i++) {
-        c = carriers[i]; if (c.st !== 0 || c.t !== mover) continue;
-        if (!best || (mover === 'e' ? c.x < best.x : c.x > best.x)) best = c;
-      }
-      if (!best) return false;
-      best.st = 4; best.inj = true;
-      best.tx = mover === 'e' ? eP - 4 - Math.random() * 2.5 * L.spP : eN + 4 + Math.random() * 2.5 * L.spN;
-      return true;
     }
     function launchEvent(eN, eP) {
       // alternate: an electron crosses into P and recombines with a hole there, or a hole crosses into N
@@ -474,12 +495,9 @@
       gDyn.innerHTML = s;
       // readouts
       var k = stageIndex();
-      var wkey = k + '|' + (eq ? st.V : 0);
-      if (wkey !== st.stage || force) {
-        st.stage = wkey;
-        if (eq && st.V > 0) watch.innerHTML = '<b>What to watch — forward bias V = +' + fmt(st.V, 2) + ' V:</b> the barrier falls to V<sub>d</sub> − V = ' + fmt(phi, 3) + ' V, the SCR narrows and E<sub>F</sub> splits by qV. Diffusion over the lower barrier grows as e<sup>V/V<sub>T</sub></sup>, drift does not change: a net current flows. In (e) the magnified minority edges n<sub>p0</sub>e<sup>V/V<sub>T</sub></sup> and p<sub>n0</sub>e<sup>V/V<sub>T</sub></sup> grow ×10 every 60 mV.';
-        else if (eq && st.V < 0) watch.innerHTML = '<b>What to watch — reverse bias V = −' + fmt(-st.V, 2) + ' V:</b> the barrier rises to V<sub>d</sub> + |V| = ' + fmt(phi, 3) + ' V, the SCR widens and uncovers more ions, the field grows. Diffusion dies away; only the small drift of minority carriers is left (−I<sub>0</sub>).';
-        else watch.innerHTML = '<b>What to watch — ' + STAGES[k].name + ':</b> ' + STAGES[k].watch;
+      if (k !== st.stage || force) {
+        st.stage = k;
+        watch.innerHTML = '<b>What to watch — ' + STAGES[k].name + ':</b> ' + STAGES[k].watch;
       }
       var ratio = apart ? null : m.diff(phi) / Math.max(m.drift(phi), 1e-300);
       read.innerHTML =
@@ -487,11 +505,12 @@
         ro('SCR width W (µm)', fmt(g.W * 1e4, 3), 'eq. ' + fmt(m.eq.W * 1e4, 3)) +
         ro('W<sub>n</sub> | W<sub>p</sub>', fmt(g.xn * 1e4, 3) + ' µm | ' + fmtLen(-g.xp), '') +
         ro('ℰ<sub>max</sub> (kV/cm)', fmt(g.Em / 1e3, 1), 'eq. ' + fmt(m.eq.Em / 1e3, 1)) +
-        ro('diffusion / drift', apart ? '—' : ((eq && !st.V) || Math.abs(ratio - 1) < 0.0005 ? '1 (balanced)' : fmtPow(ratio)), apart ? 'no contact' : (eq && !st.V ? 'net current 0' : 'net flux ≠ 0')) +
-        ro('n<sub>p</sub>(x<sub>p</sub>) | p<sub>n</sub>(x<sub>n</sub>)', apart ? '—' : fmtSci(m.ND * Math.exp(-phi / VT)) + ' | ' + fmtSci(m.NA * Math.exp(-phi / VT)), apart ? '' : (eq && st.V ? 'cm⁻³, eq. × e<sup>V/V<sub>T</sub></sup>' : 'cm⁻³, minority at the SCR edges')) +
-        ro(eq && st.V ? 'bias V (on P)' : 'time', apart ? 'before contact' : (eq ? (st.V ? (st.V > 0 ? '+' : '−') + fmt(Math.abs(st.V), 2) + ' V' : 'equilibrium') : 'log t: ' + fmt(curFrac() * 100, 0) + ' %'), eq && st.V ? (st.V > 0 ? 'forward' : 'reverse') : 'qualitative');
+        ro('diffusion / drift', apart ? '—' : (eq || Math.abs(ratio - 1) < 0.0005 ? '1 (balanced)' : fmtPow(ratio)), apart ? 'no contact' : (eq ? 'net current 0' : 'net flux ≠ 0')) +
+        ro('can climb the step', apart ? '—' : fmtSci(Math.exp(-phi / VT)), 'e<sup>−qφ/kT</sup>, dark part of a tail') +
+        ro('n<sub>p</sub>(x<sub>p</sub>) | p<sub>n</sub>(x<sub>n</sub>)', apart ? '—' : fmtSci(m.ND * Math.exp(-phi / VT)) + ' | ' + fmtSci(m.NA * Math.exp(-phi / VT)), apart ? '' : 'cm⁻³, minority at the SCR edges') +
+        ro('time', apart ? 'before contact' : (eq ? 'equilibrium' : 'log t: ' + fmt(curFrac() * 100, 0) + ' %'), 'qualitative');
       tsl.value = Math.round(st.s / S_END * 1000);
-      tlab.textContent = apart ? 'apart' : eq ? (st.V ? 'formed, biased' : 'equilibrium') : 'forming';
+      tlab.textContent = apart ? 'apart' : eq ? 'equilibrium' : 'forming';
     }
     function ro(lab, val, sub) { return '<div><span>' + lab + '</span><strong>' + val + '</strong>' + (sub ? '<span>' + sub + '</span>' : '') + '</div>'; }
     function fmtLen(cm) { var um = cm * 1e4; return um < 0.1 ? fmt(um * 1e3, 1) + ' nm' : fmt(um, 3) + ' µm'; }
@@ -509,7 +528,7 @@
       var a = L.a, s = '', BH = L.BH, by0 = a.by0, by1 = a.by1;
       var xnpx = g.xn * 1e4 * L.ppu, xppx = xnpx / L.rc;
       var xl = L.ML, xr = L.ML + L.PW;
-      var wide = L.kP, wtag = wide > 1.5 ? '; P side stretched ×' + Math.round(wide) + ' as in (c)–(e)' : '';
+      var wide = L.kP, wtag = wide > 1.5 ? '; P side stretched ×' + Math.round(wide) + ' as in (c)–(d)' : '';
       s += title(a.top, L.phone ? (wtag ? '(a) Cartoon (not to scale, P side ×' + Math.round(wide) + ')' : '(a) The bar (cartoon, not to scale)') : '(a) The bar: carriers and ions (cartoon, not to scale' + wtag + ')');
       // pieces
       s += '<rect x="' + xl.toFixed(1) + '" y="' + by0 + '" width="' + (L.J - gap - xl).toFixed(1) + '" height="' + BH + '" fill="#fdf6ef" stroke="#c9b9a8"/>';
@@ -549,10 +568,10 @@
       s += '<path d="' + ph + '" fill="#fff" fill-opacity="0.85" stroke="' + COL.ho + '" stroke-width="1.6"/>';
       s += '<path d="' + pe + '" fill="' + COL.el + '"/>';
       // recombination flashes
+      // recombination: a red ball of carrier size that implodes (author, 2026-11-08), lasting as the old × mark
       st.flashes.forEach(function (f) {
-        var k = f.t < 0.6 ? 1 : 1 - (f.t - 0.6) / 0.8, r = (f.t < 0.15 ? 3 + 30 * f.t : 7.5) * (L.phone ? 0.75 : 1);
-        s += '<circle cx="' + f.x.toFixed(1) + '" cy="' + f.y.toFixed(1) + '" r="' + (r + 2.5).toFixed(1) + '" fill="#fff" opacity="' + (0.75 * k).toFixed(2) + '"/>';
-        s += '<path d="M' + (f.x - r).toFixed(1) + ' ' + (f.y - r).toFixed(1) + 'l' + 2 * r + ' ' + 2 * r + 'M' + (f.x + r).toFixed(1) + ' ' + (f.y - r).toFixed(1) + 'l' + (-2 * r) + ' ' + 2 * r + '" stroke="#8a1c1c" stroke-width="2.6" stroke-linecap="round" opacity="' + k.toFixed(2) + '"/>';
+        var r0 = Math.max(L.rN, L.rP) + 0.6, r = f.t < 0.25 ? r0 : r0 * Math.max(0, 1 - (f.t - 0.25) / 1.0);
+        if (r > 0.3) s += '<circle cx="' + f.x.toFixed(1) + '" cy="' + f.y.toFixed(1) + '" r="' + r.toFixed(2) + '" fill="#A33A3A"/>';
       });
       // junction line
       if (!apart) s += line(L.J, by0 - 4, L.J, by1 + 4, '#7d8896', 1, '2 3');
@@ -595,12 +614,11 @@
       s += arrow(L.J, b.r2 - 3, L.J + lD, COL.ho, 2.4);
       s += arrow(L.J, b.r2 + 4, L.J - lR, COL.ho, 2, '5 3');
       var fs = L.phone ? 10 : 11;
-      var bal0 = (st.s >= S_APART + S_FORM && !st.V) || Math.abs(m.diff(phi) / m.drift(phi) - 1) < 0.0005;
-      var dtxt = bal0 ? 'diffusion = drift' : 'diffusion 10' + supNum(Math.round(Math.log10(m.diff(phi) / m.drift(phi))));
+      var bal = st.s >= S_APART + S_FORM || Math.abs(m.diff(phi) / m.drift(phi) - 1) < 0.0005;
+      var dtxt = bal ? 'diffusion = drift' : 'diffusion 10' + supNum(Math.round(Math.log10(m.diff(phi) / m.drift(phi))));
       s += txt(L.J + Math.max(lD, lR) + 8, b.r2 + 1, dtxt, { fs: fs, fill: COL.ho });
       s += txt(L.J + lR + 8, b.r1 + 8, 'drift (dashed)', { fs: fs, fill: COL.el });
-      var bal = bal0, rev = st.V < 0 && st.s >= S_APART + S_FORM;
-      if (!L.phone || bal) s += txt(L.ML + L.PW, b.r1 + (L.phone ? 8 : 1), bal ? 'equilibrium: net current zero' : rev ? 'drift > diffusion: −I₀' : st.V > 0 ? 'diffusion > drift: forward current' : (phi < 3 * VT ? 'diffusion only' : 'diffusion > drift'), { anchor: 'end', fs: fs + 0.5, w: 600, fill: bal ? COL.fld : COL.acc });
+      if (!L.phone || bal) s += txt(L.ML + L.PW, b.r1 + (L.phone ? 8 : 1), bal ? 'equilibrium: net current zero' : (phi < 3 * VT ? 'diffusion only' : 'diffusion > drift'), { anchor: 'end', fs: fs + 0.5, w: 600, fill: bal ? COL.fld : COL.acc });
       return s;
     }
 
@@ -629,7 +647,9 @@
       var xs = [], i, N = 160;
       var x0 = xLeft();
       for (i = 0; i <= 40; i++) xs.push(x0 + (g.xp * 1e4 - x0) * i / 40);
-      for (i = 0; i <= N; i++) xs.push(g.xp * 1e4 + (g.xn - g.xp) * 1e4 * i / N);
+      // the P part of the SCR is short in true x but drawn stretched: sample it on its own
+      for (i = 1; i <= 60; i++) xs.push(g.xp * 1e4 * (1 - i / 60));
+      for (i = 1; i <= N; i++) xs.push(g.xn * 1e4 * i / N);
       for (i = 0; i <= 40; i++) xs.push(g.xn * 1e4 + (XMAX - g.xn * 1e4) * i / 40);
       return xs;
     }
@@ -646,10 +666,14 @@
         var narrow = L.J - x0 < 5; if (narrow) x0 = L.J - 5; // a P block thinner than 5 px is drawn 5 px wide (true width in the label)
         s += '<rect x="' + x0.toFixed(1) + '" y="' + ymap(0).toFixed(1) + '" width="' + (L.J - x0).toFixed(1) + '" height="' + (yp - ymap(0)).toFixed(1) + '" fill="' + COL.accep + '" fill-opacity="0.3" stroke="' + COL.accep + '" stroke-width="1.5"/>';
         if (x1 - L.J > 36) s += txt((L.J + x1) / 2, yn + 13, '+qN' + sb('D'), { anchor: 'middle', fs: 11, fill: '#9a4f0c' });
-        var lab = '−qN' + sb('A') + (r > L.rc ? (L.phone ? ' (drawn ×' + (+L.rc.toFixed(2)) + ', true ×' + Math.round(r) + ')' : ' (drawn ×' + (+L.rc.toFixed(2)) + ' over a ×' + Math.round(L.kP) + ' stretched width: true ×' + Math.round(r) + ', same charge)') : '');
-        s += txt(L.J + 6, ymap(-0.8) + 3, lab, { fs: 10.5, fill: COL.accep });
+        // -qN_A next to its block, clear of the SCR edge guides (the drawn/true ratio is in the panel's top line)
+        var ctxR = { x0: L.ML, x1: L.ML + L.PW, y0: P.top, y1: P.top + P.h, boxes: [{ x: x0, y: ymap(0), w: L.J - x0, h: yp - ymap(0) }, { x: L.J, y: yn, w: x1 - L.J, h: ymap(0) - yn }],
+          lines: [[[x0, P.top], [x0, P.top + P.h]], [[x1, P.top], [x1, P.top + P.h]], [[L.ML, ymap(0)], [L.ML + L.PW, ymap(0)]]] };
+        s += place(['−qN' + sb('A')], [[L.J + 6, ymap(-0.6) + 4], [x0 - 6, ymap(-0.6) + 4, 'end'], [x1 + 6, ymap(-0.6) + 4]], { fs: 10.5, fill: COL.accep }, ctxR);
       }
-      s += txt(L.ML + L.PW, P.top - 5, 'N = N' + sb('D'), { anchor: 'end', fs: 10, fill: COL.grey });
+      r = m.NA / m.ND;
+      s += txt(L.ML + L.PW, P.top - 5, (r > L.rc ? (L.phone ? 'N' + sb('A') + ' drawn ×' + (+L.rc.toFixed(2)) :
+        'N = N' + sb('D') + '; −qN' + sb('A') + ' drawn ×' + (+L.rc.toFixed(2)) + ' over a ×' + Math.round(L.kP) + ' stretched width (true ×' + Math.round(r) + ', same charge)') : 'N = N' + sb('D')), { anchor: 'end', fs: 10, fill: COL.grey });
       return s;
     }
     function drawE(g, apart) {
@@ -666,8 +690,12 @@
         var xs = [g.xp * 1e4, 0, g.xn * 1e4];
         var d = 'M' + xpx(xs[0]).toFixed(1) + ' ' + ymap(0).toFixed(1) + 'L' + L.J.toFixed(1) + ' ' + ymap(-g.Em / 1e3).toFixed(1) + 'L' + xpx(xs[2]).toFixed(1) + ' ' + ymap(0).toFixed(1);
         s += '<path d="' + d + 'Z" fill="' + COL.fld + '" fill-opacity="0.16" stroke="' + COL.fld + '" stroke-width="2"/>';
-        var xnp = xpx(xs[2]) - L.J;
-        s += txt(L.J + 0.55 * xnp + 7, ymap(-0.45 * g.Em / 1e3) + 4, (L.phone ? '' : 'ℰ(0) = ') + '−ℰ' + sb('max') + ' = ' + fmt(-g.Em / 1e3, 1), { fs: 10.5, fill: COL.fld });
+        var xnp = xpx(xs[2]) - L.J, xP0 = xpx(xs[0]), xN1 = xpx(xs[2]), em = -g.Em / 1e3;
+        var ctxE = { x0: L.ML, x1: L.ML + L.PW, y0: P.top, y1: P.top + P.h, boxes: [],
+          lines: [[[xP0, ymap(0)], [L.J, ymap(em)], [xN1, ymap(0)]], [[xP0, P.top], [xP0, P.top + P.h]], [[xN1, P.top], [xN1, P.top + P.h]],
+            [[L.ML, ymap(0)], [L.ML + L.PW, ymap(0)]], [[L.ML, ymap(-e)], [L.ML + L.PW, ymap(-e)]]] };
+        var eTxt = ['ℰ(0) = −ℰ' + sb('max') + ' = ' + fmt(em, 1), '−ℰ' + sb('max') + ' = ' + fmt(em, 1), fmt(em, 1)];
+        s += place(eTxt, [[L.J + 0.5 * xnp, ymap(0.78 * em) + 4], [L.J + 0.4 * xnp, ymap(0.85 * em) + 4], [xN1 + 6, ymap(0.5 * em) + 4], [xP0 - 6, ymap(0.5 * em) + 4, 'end'], [L.J + 6, ymap(em) + 15], [L.J + 6, Math.max(ymap(em), ymap(0) + 6) + 15], [xN1 + 6, ymap(0) + 17]], { fs: 10.5, fill: COL.fld }, ctxE);
       }
       s += txt(L.ML + L.PW, P.top - 5, L.phone ? 'ℰ < 0 (N → P); area = φ' : 'ℰ < 0: it points from N to P; shaded area = φ', { anchor: 'end', fs: 10, fill: COL.grey });
       return s;
@@ -682,100 +710,226 @@
       s += line(L.ML, ymap(-m.Vd), L.ML + L.PW, ymap(-m.Vd), '#cfd6df', 1, '3 3');
       if (!apart) {
         var xs = xsSCR(g);
-        s += '<path d="' + pathFrom(xpx, function (x) { return ymap(m.V(g, x * 1e-4)); }, xs) + '" fill="none" stroke="' + COL.navy + '" stroke-width="2"/>';
-        var yl = ymap(-g.phi) + 13 < P.top + P.h - 2 ? ymap(-g.phi) + 13 : ymap(-g.phi) - 5;
-        s += txt(L.ML + 6, yl, 'V' + sb('P') + ' = −φ = ' + fmt(-g.phi, 3) + ' V', { fs: 10.5, fill: COL.navy });
-        s += txt(L.ML + L.PW - 4, ymap(0) - 5, 'N grounded: V = 0', { anchor: 'end', fs: 10.5, fill: COL.navy });
+        s += '<path d="' + pathFrom(xpx, function (x) { return ymap(Vdr(g, x)); }, xs) + '" fill="none" stroke="' + COL.navy + '" stroke-width="2"/>';
+        // labels clear of the curve and of the SCR edge guides: scan along a row under the P level and over the N level
+        var xP0 = xpx(g.xp * 1e4), xN1 = xpx(g.xn * 1e4);
+        var ctxV = { x0: L.ML, x1: L.ML + L.PW, y0: P.top, y1: P.top + P.h, boxes: [],
+          lines: [pts(xpx, function (x) { return ymap(Vdr(g, x)); }, xs), [[xP0, P.top], [xP0, P.top + P.h]], [[xN1, P.top], [xN1, P.top + P.h]], [[L.ML, ymap(-m.Vd)], [L.ML + L.PW, ymap(-m.Vd)]]] };
+        var scan = function (y, a) { var c = []; for (var xx = L.ML + 6; xx < L.ML + L.PW - 6; xx += 6) c.push([a === 'end' ? L.ML + L.PW - 6 - (xx - L.ML - 6) : xx, y, a]); return c; };
+        var yMid = (ymap(0) + ymap(-g.phi)) / 2 + 4;
+        s += place(['V' + sb('P') + ' = −φ = ' + fmt(-g.phi, 3) + ' V', 'V' + sb('P') + ' = ' + fmt(-g.phi, 3) + ' V', 'V' + sb('P') + ' = −φ'],
+          scan(ymap(-g.phi) + 15).concat(scan(ymap(-g.phi) - 8), scan(yMid)), { fs: 10.5, fill: COL.navy }, ctxV);
+        s += place(['N grounded: V = 0', 'V = 0'], scan(ymap(0) - 7, 'end').concat(scan(ymap(0) + 15, 'end'), scan(ymap(0) + 28, 'end')), { fs: 10.5, fill: COL.navy }, ctxV);
       } else {
         s += txt(L.J, ymap(-m.Vd * 0.5), 'no field, no potential step', { anchor: 'middle', fs: 11, fill: COL.grey });
       }
       return s;
     }
 
+    // ---- label placement (no label on a line): candidate positions, first one whose box touches no line, no box, stays in the panel
+    function textW(str, f, bold) { var t = str.replace(/<[^>]*>/g, ''); return t.length * f * (bold ? 0.68 : 0.62) + 3; }
+    function boxOf(c, w, f) { // from the cap height to below the subscripts
+      var a = c[2] || 'start', x = a === 'end' ? c[0] - w : a === 'middle' ? c[0] - w / 2 : c[0];
+      return { x: x, y: c[1] - 0.9 * f, w: w, h: 1.4 * f };
+    }
+    function hitLines(b, lines) {
+      for (var a = 0; a < lines.length; a++) {
+        var Lp = lines[a];
+        for (var k = 1; k < Lp.length; k++) {
+          var xa = Lp[k - 1][0], ya = Lp[k - 1][1], xb = Lp[k][0], yb = Lp[k][1];
+          if (Math.max(xa, xb) < b.x - 1 || Math.min(xa, xb) > b.x + b.w + 1 || Math.max(ya, yb) < b.y - 1 || Math.min(ya, yb) > b.y + b.h + 1) continue;
+          var n = Math.max(2, Math.ceil(Math.hypot(xb - xa, yb - ya) / 2));
+          for (var c = 0; c <= n; c++) {
+            var xx = xa + (xb - xa) * c / n, yy = ya + (yb - ya) * c / n;
+            if (xx >= b.x - 1 && xx <= b.x + b.w + 1 && yy >= b.y - 1 && yy <= b.y + b.h + 1) return true;
+          }
+        }
+      }
+      return false;
+    }
+    function hitBoxes(b, boxes) {
+      for (var k = 0; k < boxes.length; k++) { var o = boxes[k]; if (b.x < o.x + o.w && b.x + b.w > o.x && b.y < o.y + o.h && b.y + b.h > o.y) return true; }
+      return false;
+    }
+    // texts: [full, short] (short may be ''); returns the svg text, or '' when nothing fits (then st.ov counts it, for the tests)
+    function place(texts, cands, o, ctx) {
+      for (var t = 0; t < texts.length; t++) {
+        if (!texts[t]) continue;
+        var w = textW(texts[t], o.fs, o.w);
+        for (var c = 0; c < cands.length; c++) {
+          var b = boxOf(cands[c], w, o.fs);
+          if (b.x < ctx.x0 + 1 || b.x + b.w > ctx.x1 - 1 || b.y < ctx.y0 + 1 || b.y + b.h > ctx.y1 - 1) continue;
+          if (hitLines(b, ctx.lines) || hitBoxes(b, ctx.boxes)) continue;
+          ctx.boxes.push(b);
+          var oo = {}; for (var kk in o) oo[kk] = o[kk]; oo.anchor = cands[c][2] || 'start';
+          return txt(cands[c][0], cands[c][1], texts[t], oo);
+        }
+      }
+      st.ov = (st.ov || 0) + 1; st.ovList = (st.ovList || []).concat([texts[0].replace(/<[^>]*>/g, '')]);
+      return '';
+    }
+    function pts(fx, fy, xs) { return xs.map(function (x) { return [fx(x), fy(x)]; }); }
+    function polyD(p) { var d = ''; for (var i = 0; i < p.length; i++) d += (i ? 'L' : 'M') + p[i][0].toFixed(1) + ' ' + p[i][1].toFixed(1); return d; }
+
     function drawBands(g, gap, apart) {
-      var P = L.bd, m = st.model, s = '';
+      var P = L.bd, m = st.model, s = '', fs = L.phone ? 10 : 11;
       var Ecn = EG / 2 - m.dEn; // E_C - E_F(N), energies from E_F(N) = 0
-      var emin = -(EG - Ecn) - 0.12, emax = Ecn + Math.max(m.Vd, g.phi) + 0.16;
-      var ymap = function (E) { return P.top + 8 + (emax - E) / (emax - emin) * (P.h - 16); };
-      s += '<rect x="' + L.ML + '" y="' + P.top + '" width="' + L.PW + '" height="' + P.h + '" fill="none" stroke="' + COL.border + '"/>';
+      var emaxT = 5.2 * KTD;    // drawn height of a Boltzmann tail
+      var emax = Ecn + Math.max(m.Vd, emaxT) + 0.28, emin = Math.min(Ecn - EG, Ecn + m.Vd - EG - emaxT) - 0.12;
+      var ymap = function (E) { return P.top + 6 + (emax - E) / (emax - emin) * (P.h - 12); };
+      var x0 = L.ML, x1 = L.ML + L.PW;
+      var ctx = { x0: x0, x1: x1, y0: P.top, y1: P.top + P.h, lines: [], boxes: [] };
+      s += '<rect x="' + x0 + '" y="' + P.top + '" width="' + L.PW + '" height="' + P.h + '" fill="none" stroke="' + COL.border + '"/>';
       if (!apart) s += scrShade(P, g);
-      s += txt(L.ML, P.top - 5, '(d) band diagram (energies to scale)', { fs: L.phone ? 11 : 12, w: 600, fill: COL.navy });
-      var fs = L.phone ? 10 : 11;
-      var Ec = function (x) { return Ecn - (apart ? (x < 0 ? 0 : 0) : m.V(g, x * 1e-4)); };
-      var xsh = function (x) { return xpx(x) + (x < 0 ? -gap : gap); };
-      var xs = apart ? null : xsSCR(g);
-      var EfP = -m.Vd + g.phi; // P-side Fermi level rises with the bands
+      // the longest title that fits the panel width (bold 12 px: about 7.6 px per character)
+      var dT = ['(d) band diagram (energies to scale) with the Boltzmann tails (drawn with kT ×10) and the barrier', '(d) band diagram (energies to scale) with the Boltzmann tails (kT ×10)', '(d) bands (to scale; tails: kT ×10)'].filter(function (t) { return t.length * (L.phone ? 7 : 7.6) <= L.w - L.ML - 6; })[0] || '(d) bands';
+      s += txt(L.ML, P.top - 5, dT, { fs: L.phone ? 11 : 12, w: 600, fill: COL.navy });
       if (apart) {
-        // two separate diagrams
-        var xL0 = L.ML, xL1 = L.J - gap, xR0 = L.J + gap, xR1 = L.ML + L.PW;
+        // two separate diagrams, aligned on E_C (no contact yet)
+        var xL0 = x0, xL1 = L.J - gap, xR0 = L.J + gap, xR1 = x1;
         var EcP = Ecn, EfP0 = -m.Vd;
         s += line(xL0, ymap(EcP), xL1, ymap(EcP), COL.text, 2) + line(xR0, ymap(Ecn), xR1, ymap(Ecn), COL.text, 2);
         s += line(xL0, ymap(EcP - EG), xL1, ymap(EcP - EG), COL.text, 2) + line(xR0, ymap(Ecn - EG), xR1, ymap(Ecn - EG), COL.text, 2);
-        s += line(xL0, ymap(EcP - EG / 2), xL1, ymap(EcP - EG / 2), COL.grey, 1, '1.5 3') + line(xR0, ymap(Ecn - EG / 2), xR1, ymap(Ecn - EG / 2), COL.grey, 1, '1.5 3');
         s += line(xL0, ymap(EfP0), xL1, ymap(EfP0), COL.ho, 2, '7 4') + line(xR0, ymap(0), xR1, ymap(0), COL.el, 2, '7 4');
-        s += txt(xL0 + 4, ymap(EfP0) - 5, 'E' + sb('F') + '(P)', { fs: fs, fill: COL.ho });
-        s += txt(xR1 - 4, ymap(0) + 14, 'E' + sb('F') + '(N)', { anchor: 'end', fs: fs, fill: COL.el });
+        ctx.lines.push([[xL0, ymap(EcP)], [xL1, ymap(EcP)]], [[xR0, ymap(Ecn)], [xR1, ymap(Ecn)]], [[xL0, ymap(EcP - EG)], [xL1, ymap(EcP - EG)]],
+          [[xR0, ymap(Ecn - EG)], [xR1, ymap(Ecn - EG)]], [[xL0, ymap(EfP0)], [xL1, ymap(EfP0)]], [[xR0, ymap(0)], [xR1, ymap(0)]]);
         var xa = L.J + gap + 26;
         s += line(xR0 + 4, ymap(EfP0), xa + 6, ymap(EfP0), COL.ho, 1, '2 2');
+        ctx.lines.push([[xR0 + 4, ymap(EfP0)], [xa + 6, ymap(EfP0)]], [[xa, ymap(0)], [xa, ymap(EfP0)]]);
         s += '<path d="M' + xa + ' ' + (ymap(0) + 2) + 'V' + (ymap(EfP0) - 2) + '" stroke="' + COL.navy + '" stroke-width="1.3"/>' +
           '<path d="M' + (xa - 3.5) + ' ' + (ymap(0) + 8) + 'l3.5 -6l3.5 6zM' + (xa - 3.5) + ' ' + (ymap(EfP0) - 8) + 'l3.5 6l3.5 -6z" fill="' + COL.navy + '"/>';
-        s += txt(xa + 6, (ymap(0) + ymap(EfP0)) / 2 + 4, 'q' + it('V') + sb('d') + ' = ' + fmt(m.Vd, 3) + ' eV', { fs: fs + 0.5, w: 600, fill: COL.navy });
-      } else {
-        var dC = pathFrom(xpx, function (x) { return ymap(Ec(x)); }, xs);
-        var dV = pathFrom(xpx, function (x) { return ymap(Ec(x) - EG); }, xs);
-        var dI = pathFrom(xpx, function (x) { return ymap(Ec(x) - EG / 2); }, xs);
-        s += '<path d="' + dI + '" fill="none" stroke="' + COL.grey + '" stroke-width="1" stroke-dasharray="1.5 3"/>';
-        s += '<path d="' + dC + '" fill="none" stroke="' + COL.text + '" stroke-width="2"/>';
-        s += '<path d="' + dV + '" fill="none" stroke="' + COL.text + '" stroke-width="2"/>';
-        var xpE = xpx(g.xp * 1e4), xnE = xpx(g.xn * 1e4), done = st.s >= S_APART + S_FORM;
-        if (done && st.V) { // bias: quasi-Fermi levels, flat across the SCR, split by qV (Ch6)
-          var up = st.V > 0, yN = ymap(0), yP = ymap(-st.V);
-          s += line(L.ML, yP, xnE, yP, COL.ho, 2, '7 4');
-          s += line(xpE, yN, L.ML + L.PW, yN, COL.el, 2, '7 4');
-          if (xnE + 34 < L.ML + L.PW) s += txt(xnE + 5, yP + 4, 'E' + sb('Fp'), { fs: fs, fill: COL.ho, w: 600 });
-          else s += txt(L.ML + (L.J - L.ML) * 0.12, yP - 5, 'E' + sb('Fp'), { fs: fs, fill: COL.ho, w: 600 });
-          s += txt(xpE - 5, yN + 4, 'E' + sb('Fn'), { anchor: 'end', fs: fs, fill: COL.el, w: 600 });
-          var xg2 = L.ML + (L.J - L.ML) * (L.phone ? 0.42 : 0.5);
-          if (Math.abs(yP - yN) > 14) {
-            s += '<path d="M' + xg2 + ' ' + (Math.min(yN, yP) + 1) + 'V' + (Math.max(yN, yP) - 1) + '" stroke="' + COL.navy + '" stroke-width="1.2"/>';
-            s += txt(xg2 + 4, (yN + yP) / 2 + 4, 'q|' + it('V') + '| = ' + fmt(Math.abs(st.V), 2) + ' eV', { fs: fs, fill: COL.navy });
-          }
-        } else if (done) {
-          s += line(L.ML, ymap(0), L.ML + L.PW, ymap(0), COL.navy, 2, '7 4');
-          s += txt(L.ML + L.PW - 4, ymap(0) + 14, 'E' + sb('F') + ' flat', { anchor: 'end', fs: fs, fill: COL.navy, w: 600 });
-        } else {
-          s += line(L.ML, ymap(EfP), xpE, ymap(EfP), COL.ho, 2, '7 4');
-          s += line(xnE, ymap(0), L.ML + L.PW, ymap(0), COL.el, 2, '7 4');
-          s += line(xpE, ymap(EfP), xnE, ymap(0), '#9aa6b5', 1, '1.5 3');
-          s += txt(L.ML + 4, ymap(EfP) - 5, 'E' + sb('F') + '(P)', { fs: fs, fill: COL.ho });
-          s += txt(L.ML + L.PW - 4, ymap(0) + 14, 'E' + sb('F') + '(N)', { anchor: 'end', fs: fs, fill: COL.el });
-          // gap between Fermi levels
-          var xg = L.ML + (L.J - L.ML) * (L.phone ? 0.42 : 0.5);
-          if (ymap(EfP) - ymap(0) > 16 && xg < xpE - 10) {
-            s += line(xg, ymap(0), xpE, ymap(0), '#b8c2cf', 1, '2 2');
-            s += '<path d="M' + xg + ' ' + (ymap(0) + 1) + 'V' + (ymap(EfP) - 1) + '" stroke="' + COL.grey + '" stroke-width="1"/>';
-            s += txt(xg + 4, (ymap(0) + ymap(EfP)) / 2 + 4, 'ΔE' + sb('F') + ' = ' + fmt(m.Vd - g.phi, 3) + ' eV', { fs: fs, fill: COL.grey });
-          }
-        }
-        // step bracket qphi on the right of the P side / left of N side
-        var xb = L.ML + L.PW - (done && st.V ? (L.phone ? 122 : 140) : (L.phone ? 92 : 110));
-        s += line(L.ML, ymap(Ecn + g.phi), xb + 6, ymap(Ecn + g.phi), '#b8c2cf', 1, '2 2');
-        if (ymap(Ecn) - ymap(Ecn + g.phi) > 12) {
-          s += '<path d="M' + xb + ' ' + (ymap(Ecn + g.phi) + 2) + 'V' + (ymap(Ecn) - 2) + '" stroke="' + COL.navy + '" stroke-width="1.3"/>';
-          s += '<path d="M' + (xb - 3.5) + ' ' + (ymap(Ecn + g.phi) + 8) + 'l3.5 -6l3.5 6zM' + (xb - 3.5) + ' ' + (ymap(Ecn) - 8) + 'l3.5 6l3.5 -6z" fill="' + COL.navy + '"/>';
-        }
-        var yq = ymap(Ecn) - ymap(Ecn + g.phi) > 18 ? (ymap(Ecn + g.phi) + ymap(Ecn)) / 2 + 4 : ymap(Ecn + g.phi) - 6;
-        if (done && st.V < 0) yq = ymap(Ecn + 0.28 * g.phi) + 4; // keep clear of E_Fp, which crosses the bracket in reverse
-        s += txt(xb + 6, yq, (done ? (st.V ? 'q(' + it('V') + sb('d') + '−' + it('V') + ')' : 'q' + it('V') + sb('d')) : 'qφ') + ' = ' + fmt(g.phi, 3) + ' eV', { fs: done && st.V && L.phone ? fs - 0.5 : fs + 0.5, w: 600, fill: COL.navy });
+        s += place(['E' + sb('F') + '(P)'], [[xL0 + 4, ymap(EfP0) - 8], [xL0 + 4, ymap(EfP0) + 15]], { fs: fs, fill: COL.ho }, ctx);
+        s += place(['E' + sb('F') + '(N)'], [[xR1 - 4, ymap(0) + 15, 'end'], [xR1 - 4, ymap(0) - 8, 'end']], { fs: fs, fill: COL.el }, ctx);
+        s += place(['q' + it('V') + sb('d') + ' = ' + fmt(m.Vd, 3) + ' eV', 'q' + it('V') + sb('d')], [[xa + 6, (ymap(0) + ymap(EfP0)) / 2 + 4]], { fs: fs + 0.5, w: 600, fill: COL.navy }, ctx);
+        s += txt(L.ML - 5, ymap(Ecn) + 4, 'E' + sb('C'), { anchor: 'end', fs: fs, fill: COL.text });
+        s += txt(L.ML - 5, ymap(Ecn - EG) + 4, 'E' + sb('V'), { anchor: 'end', fs: fs, fill: COL.text });
+        return s;
       }
-      // band labels
-      var ecL = apart ? Ecn : Ecn + g.phi;
-      s += txt(L.ML - 5, ymap(ecL) + 4, 'E' + sb('C'), { anchor: 'end', fs: fs, fill: COL.text });
-      s += txt(L.ML - 5, ymap(ecL - EG) + 4, 'E' + sb('V'), { anchor: 'end', fs: fs, fill: COL.text });
-      s += txt(L.ML - 5, ymap(ecL - EG / 2) + 4, 'E' + sb('i'), { anchor: 'end', fs: fs, fill: COL.grey });
+      var xs = xsSCR(g), xp = g.xp * 1e4, xn = g.xn * 1e4, XL = xLeft();
+      var xpE = xpx(xp), xnE = xpx(xn), done = st.s >= S_APART + S_FORM;
+      var Ec = function (x) { return Ecn - Vdr(g, x); };
+      var top = Ecn + g.phi, EcP = top, EvP = top - EG, EvN = Ecn - EG, EfP = g.phi - m.Vd; // E_F of the P side follows its bands
+      // ---- Boltzmann tails (energy distributions of the majority carriers in each neutral region)
+      var wmax = Math.min(L.phone ? 56 : 92, 0.55 * (xpx(m.eq.xp * 1e4) - x0), 0.55 * (x1 - xpx(m.eq.xn * 1e4)));
+      var fmax = Math.sqrt(0.5) * Math.exp(-0.5), nE = 70, i, e, f;
+      // the energy window is set for the formed junction: early in the formation the tails are clipped at the frame
+      s += '<clipPath id="ixjbd' + uid + '"><rect x="' + x0 + '" y="' + P.top + '" width="' + L.PW + '" height="' + P.h + '"/></clipPath><g clip-path="url(#ixjbd' + uid + ')">';
+      var dAll = 'M' + (x1 - 2) + ' ' + ymap(Ecn).toFixed(1), dark = [];
+      for (i = 0; i <= nE; i++) {
+        e = emaxT * i / nE; f = Math.sqrt(e / KTD) * Math.exp(-e / KTD) / fmax;
+        var xx = x1 - 2 - f * wmax, yy = ymap(Ecn + e);
+        dAll += 'L' + xx.toFixed(1) + ' ' + yy.toFixed(1);
+        if (Ecn + e >= top) dark.push([xx, yy]);
+      }
+      dAll += 'L' + (x1 - 2) + ' ' + ymap(Ecn + emaxT).toFixed(1) + 'Z';
+      s += '<path d="' + dAll + '" fill="#c9d6ec" fill-opacity="0.75" stroke="' + COL.el + '" stroke-width="1"/>';
+      if (dark.length > 1) s += '<path d="M' + (x1 - 2) + ' ' + dark[0][1].toFixed(1) + polyD(dark).replace(/^M/, 'L') + 'L' + (x1 - 2) + ' ' + dark[dark.length - 1][1].toFixed(1) + 'Z" fill="' + COL.el + '" fill-opacity="0.85"/>';
+      var hAll = 'M' + (x0 + 2) + ' ' + ymap(EvP).toFixed(1), dark2 = [];
+      for (i = 0; i <= nE; i++) {
+        e = emaxT * i / nE; f = Math.sqrt(e / KTD) * Math.exp(-e / KTD) / fmax;
+        var xh = x0 + 2 + f * wmax, yh = ymap(EvP - e);
+        hAll += 'L' + xh.toFixed(1) + ' ' + yh.toFixed(1);
+        if (EvP - e <= EvN) dark2.push([xh, yh]);
+      }
+      hAll += 'L' + (x0 + 2) + ' ' + ymap(EvP - emaxT).toFixed(1) + 'Z';
+      s += '<path d="' + hAll + '" fill="#f6d9bf" fill-opacity="0.8" stroke="' + COL.ho + '" stroke-width="1"/>';
+      if (dark2.length > 1) s += '<path d="M' + (x0 + 2) + ' ' + dark2[0][1].toFixed(1) + polyD(dark2).replace(/^M/, 'L') + 'L' + (x0 + 2) + ' ' + dark2[dark2.length - 1][1].toFixed(1) + 'Z" fill="' + COL.ho + '" fill-opacity="0.85"/>';
+      s += '</g>';
+      var wTail = wmax; // the whole tail is kept free of labels
+      ctx.boxes.push({ x: x1 - 2 - wTail, y: Math.max(ymap(Ecn + emaxT), P.top), w: wTail + 2, h: ymap(Ecn) - Math.max(ymap(Ecn + emaxT), P.top) });
+      ctx.boxes.push({ x: x0, y: ymap(EvP), w: wTail + 2, h: Math.min(ymap(EvP - emaxT), P.top + P.h) - ymap(EvP) });
+      // ---- barrier guides: top of the step over the N side, bottom of the step under the P side
+      var gTop = [[xnE, ymap(top)], [x1, ymap(top)]], gBot = [[x0, ymap(EvN)], [xpE, ymap(EvN)]];
+      s += '<path d="' + polyD(gTop) + '" stroke="#8c99a8" stroke-width="1" stroke-dasharray="2 3" fill="none"/>';
+      s += '<path d="' + polyD(gBot) + '" stroke="#8c99a8" stroke-width="1" stroke-dasharray="2 3" fill="none"/>';
+      ctx.lines.push(gTop, gBot);
+      // ---- bands from the one drawn potential: E_C = E_C(N) - qV(x), E_V = E_C - E_g
+      var pC = pts(xpx, function (x) { return ymap(Ec(x)); }, xs), pV = pts(xpx, function (x) { return ymap(Ec(x) - EG); }, xs);
+      s += '<path d="' + polyD(pC) + '" fill="none" stroke="' + COL.text + '" stroke-width="2"/>';
+      s += '<path d="' + polyD(pV) + '" fill="none" stroke="' + COL.text + '" stroke-width="2"/>';
+      ctx.lines.push(pC, pV);
+      // SCR edge guides of drawAxis run through this panel too
+      ctx.lines.push([[xpE, P.top], [xpE, P.top + P.h]], [[xnE, P.top], [xnE, P.top + P.h]]);
+      // ---- Fermi levels
+      if (done) {
+        var pF = [[x0, ymap(0)], [x1, ymap(0)]];
+        s += '<path d="' + polyD(pF) + '" stroke="' + COL.navy + '" stroke-width="2" stroke-dasharray="7 4" fill="none"/>';
+        ctx.lines.push(pF);
+      } else {
+        // quasi-Fermi levels from the minority densities (eq 5.14 at the SCR edges, spill-over tails of drawn length LAMBDA):
+        // E_Fn flat from the N side to the P-side edge x_p, E_Fp flat from the P side to the N-side edge x_n; no joining line
+        var ef = Math.exp(-g.phi / VT), ef0 = Math.exp(-m.Vd / VT);
+        var tail = function (d) { return ef0 + (ef - ef0) * Math.exp(-d / LAMBDA); };
+        var xsP = [], xsN = [];
+        for (i = 0; i <= 60; i++) { xsP.push(XL + (xp - XL) * i / 60); xsN.push(xn + (XMAX - xn) * i / 60); }
+        var pFn = pts(xpx, function (x) { return ymap(EfP + VT * Math.log(tail((xp - x) * L.kP) / ef0)); }, xsP).concat([[xnE, ymap(0)], [x1, ymap(0)]]);
+        var pFp = [[x0, ymap(EfP)], [xpE, ymap(EfP)]].concat(pts(xpx, function (x) { return ymap(-VT * Math.log(tail(x - xn) / ef0)); }, xsN));
+        pFp.splice(2, 0, [xnE, ymap(EfP)]);
+        s += '<path d="' + polyD(pFn) + '" stroke="' + COL.el + '" stroke-width="2" stroke-dasharray="7 4" fill="none"/>';
+        s += '<path d="' + polyD(pFp) + '" stroke="' + COL.ho + '" stroke-width="2" stroke-dasharray="7 4" fill="none"/>';
+        ctx.lines.push(pFn, pFp);
+      }
+      // ---- the carriers crossing the step (moving dots; electrons filled blue, holes open orange)
+      if (st.bp && st.bp.length) {
+        var rr = L.phone ? 3 : 3.6, de = '', dh = '';
+        st.bp.forEach(function (p) {
+          var x = p.u < 0 ? p.u / L.kP : p.u, Y;
+          if (p.k === 0) Y = ymap(top + p.Eoff);
+          else if (p.k === 1) Y = ymap(Ec(x) + p.dE);
+          else if (p.k === 2) Y = ymap(EvN - p.Eoff);
+          else Y = ymap(Ec(x) - EG - p.dE);
+          var o = Math.max(0, Math.min(1, p.a / 0.4, (p.u - XMIN) / 0.05, (XMAX - p.u) / 0.05)).toFixed(2), X = L.J + p.u * L.ppu;
+          if (p.k < 2) de += '<circle cx="' + X.toFixed(1) + '" cy="' + Y.toFixed(1) + '" r="' + rr + '" fill="' + COL.el + '" opacity="' + o + '"/>';
+          else dh += '<circle cx="' + X.toFixed(1) + '" cy="' + Y.toFixed(1) + '" r="' + (rr - 0.4) + '" fill="#fff" stroke="' + COL.ho + '" stroke-width="1.7" opacity="' + o + '"/>';
+        });
+        s += '<g clip-path="url(#ixjbd' + uid + ')">' + de + dh + '</g>';
+      }
+      // ---- the step: measured in the neutral P region, from E_C(P) down to the level of E_C(N) (dotted guide from the N side)
+      var gLev = [[x0 + 4, ymap(Ecn)], [xnE, ymap(Ecn)]];
+      s += '<path d="' + polyD(gLev) + '" stroke="#8c99a8" stroke-width="1" stroke-dasharray="2 3" fill="none"/>';
+      ctx.lines.push(gLev);
+      var xb = x0 + Math.min(14, 0.12 * (xpE - x0));
+      if (ymap(Ecn) - ymap(top) > 18) {
+        s += '<path d="M' + xb + ' ' + (ymap(top) + 2) + 'V' + (ymap(Ecn) - 2) + '" stroke="' + COL.navy + '" stroke-width="1.3"/>';
+        s += '<path d="M' + (xb - 3.5) + ' ' + (ymap(top) + 8) + 'l3.5 -6l3.5 6zM' + (xb - 3.5) + ' ' + (ymap(Ecn) - 8) + 'l3.5 6l3.5 -6z" fill="' + COL.navy + '"/>';
+        ctx.lines.push([[xb, ymap(top)], [xb, ymap(Ecn)]]);
+      }
+      var stepName = done ? 'q' + it('V') + sb('d') : 'qφ';
+      var ym = (ymap(top) + ymap(Ecn)) / 2 + 4, yA = ymap(top), yB = ymap(Ecn);
+      s += place([stepName + ' = ' + fmt(g.phi, 3) + ' eV', stepName],
+        [[xb + 6, ym], [xb + 6, yA + 15], [xb + 6, yB - 8], [xb + 6, (yA + 3 * yB) / 4 + 4], [xb + 6, (3 * yA + yB) / 4 + 4], [xb + 6, yA - 9], [x0 + 4, yA - 9], [x0 + 4, yA - 26]],
+        { fs: fs + 0.5, w: 600, fill: COL.navy }, ctx);
+      // ---- quasi-Fermi level split while forming: bracket in the SCR between the two flat levels
+      if (!done) {
+        var yN0 = ymap(0), yP0 = ymap(EfP), xq = (xpE + xnE) / 2;
+        if (yP0 - yN0 > 16 && xnE - xpE > 8) {
+          s += '<path d="M' + xq + ' ' + (yN0 + 2) + 'V' + (yP0 - 2) + '" stroke="' + COL.grey + '" stroke-width="1.2"/>';
+          s += '<path d="M' + (xq - 3) + ' ' + (yN0 + 7) + 'l3 -5l3 5zM' + (xq - 3) + ' ' + (yP0 - 7) + 'l3 5l3 -5z" fill="' + COL.grey + '"/>';
+          ctx.lines.push([[xq, yN0], [xq, yP0]]);
+          var yq = (yN0 + yP0) / 2 + 4;
+          s += place(['E' + sb('Fn') + ' − E' + sb('Fp') + ' = ' + fmt(m.Vd - g.phi, 3) + ' eV', 'q(' + it('V') + sb('d') + ' − φ)'],
+            [[xq + 6, yq], [xq - 6, yq, 'end'], [xpE - 6, yq, 'end'], [xnE + 6, yq], [xq + 6, yq - 8], [xq + 6, yq + 8], [xq - 6, yq - 8, 'end'], [xq - 6, yq + 8, 'end'], [xpE - 6, yN0 - 8, 'end'], [xnE + 6, yP0 + 15]], { fs: fs, fill: COL.grey }, ctx);
+        }
+      }
+      // Fermi level labels in the margins, each where its line is the majority level: E_Fp on the P side (left),
+      // E_Fn on the N side (right); one E_F at equilibrium (right)
+      var leftLabs = [{ y: ymap(EcP), t: 'E' + sb('C'), c: COL.text, w: 400 }, { y: ymap(EvP), t: 'E' + sb('V'), c: COL.text, w: 400 }];
+      if (!done) leftLabs.push({ y: ymap(EfP), t: 'E' + sb('Fp'), c: COL.ho, w: 600 });
+      leftLabs.sort(function (a, b) { return a.y - b.y; });
+      for (i = 1; i < leftLabs.length; i++) if (leftLabs[i].y - leftLabs[i - 1].y < 17) leftLabs[i].y = leftLabs[i - 1].y + 17;
+      leftLabs.forEach(function (o) { s += txt(L.ML - 5, o.y + 4, o.t, { anchor: 'end', fs: fs, fill: o.c, w: o.w }); });
+      s += txt(x1 + 4, ymap(0) + 4, done ? 'E' + sb('F') : 'E' + sb('Fn'), { fs: fs, fill: done ? COL.navy : COL.el, w: 600 });
+      // ---- tail labels and the climbing fraction (desktop; on a phone they are in the legend and the readouts)
+      if (L.phone) return s;
+      s += place(['electrons of N: Boltzmann tail', 'e⁻ of N'], [[x1 - 4, ymap(Ecn + emaxT) - 6, 'end'], [x1 - wmax - 6, ymap(Ecn + 0.95 * emaxT), 'end'], [x1 - wmax - 6, ymap(Ecn + 0.8 * emaxT), 'end'], [x1 - wmax - 6, ymap(Ecn + 0.65 * emaxT), 'end'], [x1 - wmax - 6, ymap(Ecn + 0.5 * emaxT), 'end'], [x1 - wmax - 6, ymap(Ecn + 0.35 * emaxT), 'end'], [x1 - wmax - 6, ymap(Ecn + 0.2 * emaxT), 'end']], { fs: fs - 0.5, fill: COL.el }, ctx);
+      s += place(['holes of P', 'h⁺ of P'], [[x0 + wTail + 6, ymap(EvP - 1.6 * KTD)], [x0 + wTail + 6, ymap(EvP - 0.7 * KTD)], [x0 + wTail + 6, ymap(EvP - 2.6 * KTD)], [x0 + wTail + 6, ymap(EvP - 3.6 * KTD)], [x0 + wTail + 6, ymap(EvP) + 15], [x0 + wTail + 6, P.top + P.h - 9], [x0 + 4, ymap(EvP - emaxT) + 15]], { fs: fs - 0.5, fill: COL.ho }, ctx);
+      var climbs = Math.exp(-g.phi / VT);
+      s += place(['fraction that can climb the step, e' + sp('−qφ/kT') + ' = ' + fmtSci(climbs), 'climbs: ' + fmtSci(climbs)],
+        [[x1 - 6, P.top + P.h - 9, 'end'], [x1 - wmax - 8, P.top + P.h - 9, 'end'], [xnE + 6, P.top + P.h - 9]], { fs: fs, fill: COL.el, w: 600 }, ctx);
       return s;
     }
 
+    // (e) carrier densities (restored at the author's request, 2026-11-08): Boltzmann relation inside the SCR on the drawn potential Vdr, as the bands
     function drawDens(g, gap, apart) {
       var P = L.n, s = '', m = st.model;
       var ymap = function (v) { return P.top + 8 + (1.15 - v) / 1.15 * (P.h - 12); };
@@ -810,12 +964,12 @@
         var nf = function (x) { // n/N_D: Boltzmann in the SCR (eq 5.14 with phi), minority tail in P (drawn length on the stretched axis)
           if (x <= xp) return tail((xp - x) * L.kP);
           if (x >= xn) return 1;
-          return Math.exp(m.V(g, x * 1e-4) / VT);
+          return Math.exp(Vdr(g, x) / VT);
         };
         var pf = function (x) {
           if (x >= xn) return tail(x - xn);
           if (x <= xp) return 1;
-          return Math.exp(-(m.V(g, x * 1e-4) + g.phi) / VT);
+          return Math.exp(-(Vdr(g, x) + g.phi) / VT);
         };
         var seg = function (f, a, b, col, dash) {
           var pts = xs.filter(function (x) { return x >= a - 1e-12 && x <= b + 1e-12; });
@@ -881,9 +1035,10 @@
       }
       // edge guides through (c)-(e)
       if (st.s >= S_APART && g.W > 0) {
-        [g.xp, g.xn].forEach(function (xc, k) {
+        [g.xp, g.xn].forEach(function (xc) { // inside each panel frame only: the titles between the panels stay clear
           var X = xpx(xc * 1e4);
-          s += line(X, L.rho.top, X, L.axis, k ? '#7d8896' : '#7d8896', 0.8, '2 4');
+          [L.rho, L.E, L.V, L.bd].forEach(function (P) { s += line(X, P.top, X, P.top + P.h, '#7d8896', 0.8, '2 4'); });
+          s += line(X, L.n.top, X, L.axis, '#7d8896', 0.8, '2 4');
         });
         var Xn = xpx(g.xn * 1e4);
         s += txt(Xn + 3, L.axis - 4, 'x' + sb('n'), { fs: 10.5, fill: COL.grey });
@@ -894,10 +1049,10 @@
 
     function setCaption() {
       var r = st.model.NA / st.model.ND;
-      cap.innerHTML = 'Cartoon (a): numbers of carriers and ions are not to scale, motion is schematic; from contact on, each carrier that crosses recombines on the far side (×) and one ion is uncovered on each side per recombination' + (r > L.rc ? '; acceptor ions are drawn with N<sub>A</sub>/N<sub>D</sub> = ' +
-        (+L.rc.toFixed(2)) + ' instead of ' + r + ', so the P part of the SCR is ×' + Math.round(L.kP) + ' wider than to scale. To keep every panel aligned with the cartoon, the P side (x &lt; 0) of all panels is drawn stretched ×' + Math.round(L.kP) + ' (x axis in nm there; true widths in the readouts), and in (c) the −qN<sub>A</sub> block is drawn ' + (+L.rc.toFixed(2)) + ' high so that the two charges have equal drawn areas' : '') + '. Panels (c)–(e) are computed on the shared x axis, in the depletion approximation (eqs 5.15–5.19) with the barrier φ built so far in place of V<sub>d</sub>; ' +
-        'n and p follow eq 5.14 inside the SCR. φ grows as dφ/dt ∝ e<sup>(V<sub>d</sub>−φ)/V<sub>T</sub></sup> − (1 − e<sup>−φ/V<sub>T</sub></sup>): diffusion over the barrier minus the minority drift (Ch6 four fluxes), so φ → V<sub>d</sub> = (kT/q) ln(N<sub>A</sub>N<sub>D</sub>/n<sub>i</sub><sup>2</sup>) (eq 5.13), kT/q = 25.9 mV. ' +
-        'Time is qualitative and logarithmic (the real transient lasts about a picosecond). The minority tails in (e) (spill-over while forming, injection or extraction under bias) use a drawn decay length of ' + LAMBDA + ' µm (pedagogical); their edge value is e<sup>−qφ/kT</sup> of the majority density on the other side (eq 5.14), i.e. n<sub>p0</sub>e<sup>V/V<sub>T</sub></sup> and p<sub>n0</sub>e<sup>V/V<sub>T</sub></sup> under bias (eq 6.5). Once the junction has formed, (e) uses a broken linear axis: below the break the minority densities are magnified (factor shown), above it the densities are to scale, so each carrier keeps one continuous profile. Under forward bias the cartoon shows carriers injected across the SCR that recombine on the far side and are replaced from the contacts. Si, 300 K, n<sub>i</sub> = 10<sup>10</sup> cm<sup>−3</sup>, ε = 11.7ε<sub>0</sub>.';
+      cap.innerHTML = 'Cartoon (a): numbers of carriers and ions are not to scale, motion is schematic; from contact on, each carrier that crosses recombines on the far side (red dot) and one ion is uncovered on each side per recombination' + (r > L.rc ? '; acceptor ions are drawn with N<sub>A</sub>/N<sub>D</sub> = ' +
+        (+L.rc.toFixed(2)) + ' instead of ' + r + ', so the P part of the SCR is ×' + Math.round(L.kP) + ' wider than to scale. To keep every panel aligned with the cartoon, the P side (x &lt; 0) of all panels is drawn stretched ×' + Math.round(L.kP) + ' (x axis in nm there; true widths in the readouts), and in (c) the −qN<sub>A</sub> block is drawn ' + (+L.rc.toFixed(2)) + ' high so that the two charges have equal drawn areas. V(x) and the bands are obtained from the charge as drawn in (c), so they bend smoothly on both sides of x = 0: the total step qφ and the SCR edges are true, but the share of the step on the P side is drawn (' + Math.round(100 / (1 + L.rc)) + ' % instead of ' + (100 * st.model.ND / (st.model.NA + st.model.ND)).toFixed(r > 50 ? 1 : 0) + ' %)' : '') + '. Panels (c)–(d) are computed on the shared x axis, in the depletion approximation (eqs 5.15–5.19) with the barrier φ built so far in place of V<sub>d</sub>. ' +
+        'φ grows as dφ/dt ∝ e<sup>(V<sub>d</sub>−φ)/V<sub>T</sub></sup> − (1 − e<sup>−φ/V<sub>T</sub></sup>): diffusion over the barrier minus the minority drift (Ch6 four fluxes), so φ → V<sub>d</sub> = (kT/q) ln(N<sub>A</sub>N<sub>D</sub>/n<sub>i</sub><sup>2</sup>) (eq 5.13), kT/q = 25.9 mV. ' +
+        'Time is qualitative and logarithmic (the real transient lasts about a picosecond). In (d) the Boltzmann tails show how the majority carriers of each neutral region are spread in energy (drawn with kT ×10); the dark part can climb the step, a fraction e<sup>−qφ/kT</sup>. While the junction forms, the quasi-Fermi levels are flat across the SCR (E<sub>Fn</sub> up to x<sub>p</sub>, E<sub>Fp</sub> up to x<sub>n</sub>) and relax in the neutral regions over a drawn length of ' + LAMBDA + ' µm (pedagogical); they merge into one flat E<sub>F</sub> at equilibrium. Si, 300 K, n<sub>i</sub> = 10<sup>10</sup> cm<sup>−3</sup>, ε = 11.7ε<sub>0</sub>.';
     }
 
     // --- loop ---
@@ -913,6 +1068,7 @@
       }
       var g = st.model.geom(curPhi());
       stepParticles(dt * CARRIER * st.speed, g);
+      bandStep(dt * st.speed);
       if (ctl) ctl.refresh();
       frame(false);
       raf = requestAnimationFrame(loop);
@@ -927,7 +1083,8 @@
     layout(); setCaption(); syncButtons(); frame(true);
     raf = requestAnimationFrame(loop);
     // expose for tests (namespaced on the root element only)
-    root._ixState = { st: st, frame: frame, setS: setS, setPreset: setPreset, model: function () { return st.model; } };
+    root._ixState = { st: st, frame: frame, setS: setS, setPreset: setPreset, model: function () { return st.model; },
+      warm: function (sec) { for (var t = 0; t < sec; t += 0.05) bandStep(0.05); frame(true); } }; // tests: run the band carriers ahead
   }
 
   window.IX = window.IX || {};

@@ -25,24 +25,27 @@
   function xBC(vcb) { return Wscr(VdC, -vcb, NB, NC) * NC / (NB + NC); }
   var WMET = WB_REF + XBE + xBC(5);                    /* 1.427 um (EB SCR edge counted) */
 
-  function model(vbe, vcb, early) {
+  // ideal (B4 toggle): no hole injection into the collector and no reverse base current, alpha_R = 1 (an idealisation:
+  // I_C = I_S (e^{V_BE/V_T} - e^{-V_CB/V_T}), zero at V_CB = -V_BE exactly, flat base line there)
+  function model(vbe, vcb, early, ideal) {
     var WB = early ? WMET - XBE - xBC(vcb) : WB_REF;
     var IS = IS0 * WB_REF / WB;
-    var ea = Math.exp(vbe / VT), eb = Math.exp(-vcb / VT);
+    var ea = Math.exp(vbe / VT), eb = Math.exp(-vcb / VT), sbR = ideal ? 0 : ISbR;
     var In = IS * (ea - eb);                                 /* eq.(In) */
-    var IC = In - ISbR * (eb - 1);                           /* eq.(EMC) */
-    var IB = ISbF * (ea - 1) + ISbR * (eb - 1);              /* eq.(EMB) */
+    var IC = In - sbR * (eb - 1);                            /* eq.(EMC) */
+    var IB = ISbF * (ea - 1) + sbR * (eb - 1);               /* eq.(EMB) */
     return {
       WB: WB, IS: IS, In: In, IC: IC, IB: IB, IE: IC + IB,
-      IpE: IpE0 * (ea - 1), IpC: IpC0 * (eb - 1), Iideal: In,
-      n0: nB0 * ea, nW: nB0 * eb, pE: pE0 * ea, pC: pC0 * eb, plateau: IS * ea
+      IpE: IpE0 * (ea - 1), IpC: ideal ? 0 : IpC0 * (eb - 1), Iideal: In,
+      n0: nB0 * ea, nW: nB0 * eb, pE: pE0 * ea, pC: ideal ? pC0 : pC0 * eb, plateau: IS * ea
     };
   }
-  function zeroVCB(vbe, early) {
+  function zeroVCB(vbe, early, ideal) {
     var lo = -vbe - 0.2, hi = -vbe + 0.2, i, m;
-    for (i = 0; i < 60; i++) { m = (lo + hi) / 2; if (model(vbe, m, early).IC > 0) hi = m; else lo = m; }
+    for (i = 0; i < 60; i++) { m = (lo + hi) / 2; if (model(vbe, m, early, ideal).IC > 0) hi = m; else lo = m; }
     return (lo + hi) / 2;
   }
+  var VBE_PRE = [0.593, 0.611, 0.629]; // B4 presets of the zoom panels: 18 mV apart, I_C x1/2, x1, x2
 
   /* ---------------- helpers ---------------- */
   var C = { ink: '#1d2430', grey: '#6B6B6B', navy: '#1F3A5F', acc: '#D9771A', line: '#dde3ea',
@@ -193,7 +196,7 @@
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     var DEF = { vbe: 0.611, vcb: 5.0 };
-    var st = { vbe: DEF.vbe, vcb: DEF.vcb, early: false, flow: !reduce, sweeping: false, sweepT: 0, lastCtl: '', lastT: 0 };
+    var st = { vbe: DEF.vbe, vcb: DEF.vcb, early: false, ideal: false, flow: !reduce, sweeping: false, sweepT: 0, lastCtl: '', lastT: 0 };
     var disp = { vbe: st.vbe, vcb: st.vcb, yB: 0, yC: 0, yD: 0 };
 
     root.innerHTML =
@@ -206,6 +209,8 @@
       '<input type="range" data-s="vcb" min="-0.75" max="10" step="0.001"></div>' +
       '<div class="btns"><button class="play" data-b="play">▶ Sweep ' + mh('V_{CB}') + ' 5 → −0.75 V</button>' +
       '<button data-b="reset">Reset</button><button data-b="flow"></button><button data-b="early"></button></div>' +
+      '<div class="btns ideal"><button data-i="0" title="As in the course: holes are injected into the collector when the BC junction is forward biased (alpha_R = 0.744, beta_R = 2.9)">With hole injection into the collector</button>' +
+      '<button data-i="1" title="An idealisation: no holes enter the collector and there is no reverse base current (alpha_R = 1); then I_C = 0 at exactly V_CB = -V_BE">Ideal: no hole injection (' + mh('α_R') + ' = 1)</button></div>' +
       '</div>' +
       '<div class="grid"><div class="col">' +
       '<div class="pan"><div class="pt">(a) The device and its two sources <span>· dots: electrons (blue) and holes (orange) in transit</span></div>' +
@@ -229,14 +234,14 @@
     var svgA = $('[data-p=a]'), svgB = $('[data-p=b]'), svgC = $('[data-p=c]'), svgD = $('[data-p=d]');
     var bPlay = $('[data-b=play]'), bFlow = $('[data-b=flow]'), bEarly = $('[data-b=early]');
     var roBox = $('.ro'), hint = $('.hint'), oZero = $('[data-o=zero]');
-    $('[data-b=zero]').addEventListener('click', function () { setVCB(zeroVCB(st.vbe, st.early)); });
+    $('[data-b=zero]').addEventListener('click', function () { setVCB(zeroVCB(st.vbe, st.early, st.ideal)); });
     $('.leg').innerHTML =
       '<span><svg viewBox="0 0 12 12" width="12"><circle cx="6" cy="6" r="4" fill="' + C.el + '"/></svg>electron</span>' +
       '<span><svg viewBox="0 0 12 12" width="12"><circle cx="6" cy="6" r="3.6" fill="#fff" stroke="' + C.ho + '" stroke-width="1.6"/></svg>hole</span>' +
       '<span><svg viewBox="0 0 12 12" width="12"><rect x="1" y="1" width="10" height="10" fill="#fff" stroke="#c0762f"/><path d="M3.5 6h5M6 3.5v5" stroke="#c0762f" stroke-width="1.4"/></svg>donor ion</span>' +
       '<span><svg viewBox="0 0 12 12" width="12"><rect x="1" y="1" width="10" height="10" fill="#fff" stroke="#5a6f8a"/><path d="M3.5 6h5" stroke="#5a6f8a" stroke-width="1.4"/></svg>acceptor ion</span>' +
       '<span><svg viewBox="0 0 18 12" width="18"><path d="M1 6h12" stroke="' + C.fld + '" stroke-width="1.6"/><path d="M17 6l-5 -3.5v7z" fill="' + C.fld + '"/></svg>field ℰ</span>' +
-      '<span><svg viewBox="0 0 12 12" width="12"><path d="M2 2l8 8M10 2l-8 8" stroke="#8a1c1c" stroke-width="1.8" stroke-linecap="round"/></svg>recombination</span>';
+      '<span><svg viewBox="0 0 12 12" width="12"><circle cx="6" cy="6" r="4" fill="#A33A3A"/></svg>recombination (the pair vanishes)</span>';
 
     sV.value = st.vbe; sC.value = st.vcb;
     // Handoff 4: regime buttons, carrier Speed, and a synchronised copy of the controls under each panel
@@ -259,14 +264,34 @@
         speed: { get: function () { return st.spd; }, set: function (v) { st.spd = v; kick(); } }
       });
       root.querySelector('.ctl').appendChild(kctl.strip({ top: true, sliders: false }));
-      [].forEach.call(root.querySelectorAll('.pan'), function (p, k) { p.appendChild(kctl.strip({ inside: true, tag: '(' + 'abcd'[k] + ')', only: k === 3 ? ['vbe', 'vcbk'] : ['vbe', 'vcb'] })); });
+      // (a), (b): free V_BE and V_CB sliders; (c), (d): three preset V_BE buttons instead of the free V_BE slider (B4),
+      // and the V_CB slider (the knee slider, 1 mV steps, in (d))
+      [].forEach.call(root.querySelectorAll('.pan'), function (p, k) {
+        var stp = kctl.strip({ inside: true, tag: '(' + 'abcd'[k] + ')', only: k === 3 ? ['vcbk'] : k === 2 ? ['vcb'] : ['vbe', 'vcb'] });
+        if (k >= 2) {
+          var g = document.createElement('div'); g.className = 'ixk-regs vpre';
+          g.innerHTML = '<span class="ixk-tag">' + mh('V_{BE}') + '</span>' + VBE_PRE.map(function (v, i) {
+            return '<button type="button" class="ixk-r" data-v="' + v + '" title="V_BE = ' + v.toFixed(3) + ' V' + (i === 1 ? ' (reference, I_C ≈ 1 mA)' : i ? ' (+18 mV: I_C ×2)' : ' (−18 mV: I_C ×½)') + '">' + v.toFixed(3) + ' V</button>';
+          }).join('');
+          [].forEach.call(g.querySelectorAll('button'), function (b) { b.addEventListener('click', function () { setVBE(+b.getAttribute('data-v')); kref(); }); });
+          stp.insertBefore(g, stp.children[1] || null);
+        }
+        p.appendChild(stp);
+      });
     }
+    function syncPre() {
+      [].forEach.call(root.querySelectorAll('.vpre button'), function (b) { var on = Math.abs(+b.getAttribute('data-v') - st.vbe) < 1e-9; if (b._on !== on) { b.classList.toggle('on', on); b._on = on; } });
+    }
+    [].forEach.call(root.querySelectorAll('.btns.ideal button'), function (b) {
+      b.addEventListener('click', function () { st.ideal = b.getAttribute('data-i') === '1'; syncButtons(); dirty = true; kick(); });
+    });
     function syncButtons() {
       bFlow.textContent = st.flow ? '❚❚ Pause flow' : '▶ Flow';
       bFlow.classList.toggle('on', !st.flow);
       bEarly.innerHTML = 'Base-width modulation: ' + (st.early ? 'on' : 'off');
-      bEarly.classList.toggle('on', st.early);
+      bEarly.classList.toggle('on', st.early, st.ideal);
       bPlay.innerHTML = st.sweeping ? '❚❚ Pause sweep' : '▶ Sweep ' + mh('V_{CB}') + ' 5 → −0.75 V';
+      [].forEach.call(root.querySelectorAll('.btns.ideal button'), function (b) { b.classList.toggle('on', (b.getAttribute('data-i') === '1') === st.ideal); });
     }
     syncButtons();
 
@@ -278,10 +303,10 @@
       syncButtons(); kick();
     });
     $('[data-b=reset]').addEventListener('click', function () {
-      st.vbe = DEF.vbe; st.vcb = DEF.vcb; st.sweeping = false; st.sweepT = 0; st.early = false; st.lastCtl = '';
+      st.vbe = DEF.vbe; st.vcb = DEF.vcb; st.sweeping = false; st.sweepT = 0; st.early = false; st.ideal = false; st.lastCtl = '';
       sV.value = st.vbe; sC.value = st.vcb; syncButtons(); kick();
     });
-    function kref() { if (kctl) kctl.refresh(); }
+    function kref() { if (kctl) kctl.refresh(); syncPre(); }
     bFlow.addEventListener('click', function () { st.flow = !st.flow; syncButtons(); kick(); });
     bEarly.addEventListener('click', function () { st.early = !st.early; syncButtons(); dirty = true; kick(); });
 
@@ -482,10 +507,11 @@
       var fo = '';
       for (var f = 0; f < flashes.length; f++) {
         var F2 = flashes[f]; if (st.flow) F2.t += dt;
-        var kk = F2.t < 0.5 ? 1 : 1 - (F2.t - 0.5) / 0.8, rr = 4.5, fx = F2.x, fy = y0 + 6 + F2.v * (H - 12);
-        fo += '<path d="M' + (fx - rr).toFixed(1) + ' ' + (fy - rr).toFixed(1) + 'l' + 2 * rr + ' ' + 2 * rr + 'M' + (fx + rr).toFixed(1) + ' ' + (fy - rr).toFixed(1) + 'l' + (-2 * rr) + ' ' + 2 * rr + '" stroke="#8a1c1c" stroke-width="2.2" stroke-linecap="round" opacity="' + Math.max(0, kk).toFixed(2) + '"/>';
+        // recombination: a red dot of carrier size that implodes (as in "The junction forms" and "Injection and current")
+        var rr = F2.t < 0.25 ? 3.4 : 3.4 * Math.max(0, 1 - (F2.t - 0.25) / 1.0), fx = F2.x, fy = y0 + 6 + F2.v * (H - 12);
+        if (rr > 0.3) fo += '<circle cx="' + fx.toFixed(1) + '" cy="' + fy.toFixed(1) + '" r="' + rr.toFixed(2) + '" fill="#A33A3A"/>';
       }
-      flashes = flashes.filter(function (F3) { return F3.t < 1.3; });
+      flashes = flashes.filter(function (F3) { return F3.t < 1.25; });
       if (gFlash) gFlash.innerHTML = fo;
       for (var j = 0; j < pool.length; j++) {
         var c = pool[j];
@@ -512,9 +538,9 @@
       /* majority band */
       o += T(g.x1 - 2, top + 10, 'majority densities (not to scale)', { fs: 10, anchor: 'end', fill: C.grey });
       var yNE = top + 14, yNB = top + 30, yNC = top + 44;
-      o += L(g.x0, yNE, g.e1, yNE, C.el, 2.2) + T(g.x0 + 4, yNE - 3, 'n = N_E', { fs: 10.5, fill: C.el });
-      o += L(g.e2, yNB, g.e3, yNB, C.ho, 2.2) + T(g.e2 + 4, yNB - 3, 'p = N_B', { fs: 10.5, fill: C.ho });
-      o += L(g.e4, yNC, g.e5, yNC, C.el, 2.2) + T(g.e4 + 4, yNC - 3, 'n = N_C', { fs: 10.5, fill: C.el });
+      o += L(g.x0, yNE, g.e1, yNE, C.el, 2.2) + T(g.x0 + 4, yNE - 8, 'n = N_E', { fs: 10.5, fill: C.el });
+      o += L(g.e2, yNB, g.e3, yNB, C.ho, 2.2) + T(g.e2 + 4, yNB - 8, 'p = N_B', { fs: 10.5, fill: C.ho });
+      o += L(g.e4, yNC, g.e5, yNC, C.el, 2.2) + T(g.e4 + 4, yNC - 8, 'n = N_C', { fs: 10.5, fill: C.el });
       /* axis */
       o += L(g.x0, top, g.x0, yb1, C.ink, 1) + L(g.x0, yb1, g.x1, yb1, C.ink, 1);
       var zb = top + band + 4;                                          /* break marks */
@@ -561,23 +587,61 @@
       }
       o += endMark(g.e2, yn0, C.el, '', 'start', 4);
       o += endMark(g.e3, ynW, C.el, Math.abs(ynW - yn0) > 18 ? 'n(W_B) = ' + sciS(m.nW, 1) : '', 'end', -5);
-      if (vcb < 0.02) o += endMark(g.e4, ypC, C.ho, 'p_C/10', 'start', 5);
-      /* labels */
-      var nar = w < 480;
-      o += T(g.e2 + 6, Math.max(yb0 + 10, yn0 - 7), 'n(0) = ' + sciS(m.n0, 2), { fs: nar ? 10.5 : 11.5, fill: C.el, fw: 700, halo: true });
+      if (vcb < 0.02 && !st.ideal) o += endMark(g.e4, ypC, C.ho, 'p_C/10', 'start', 5);
+      /* labels (B4): each one placed where its box touches no line, no end marker and stays in the panel */
+      var nar = w < 480, segs = [], boxes = [];
+      function seg(a, b) { segs.push([a[0], a[1], b[0], b[1]]); }
+      function bez(xa, ya, xb2, yb2) { var xm2 = (xa + xb2) / 2, prev = [xa, ya]; for (var k = 1; k <= 16; k++) { var t = k / 16, u = 1 - t, pt = [u * u * u * xa + 3 * u * u * t * xm2 + 3 * u * t * t * xm2 + t * t * t * xb2, u * u * u * ya + 3 * u * u * t * ya + 3 * u * t * t * yb2 + t * t * t * yb2]; seg(prev, pt); prev = pt; } }
+      seg([g.e2, cl(yn0)], [g.e3, cl(ynW)]);
+      seg([g.x0, cl(Y(pE0 * 10))], [g.e1, cl(ypE)]); seg([g.e4, cl(ypC)], [g.e5, cl(Y(pC0 / 10))]);
+      bez(g.e1, yNE, g.e2, cl(yn0)); bez(g.e3, cl(ynW), g.e4, yNC); bez(g.e1, cl(ypE), g.e2, yNB); bez(g.e3, yNB, g.e4, cl(ypC));
+      [g.e1, g.e2, g.e3, g.e4].forEach(function (x) { seg([x, top], [x, yb1]); });
+      seg([g.x0, yb1], [g.x1, yb1]); seg([g.x0, top], [g.x0, yb1]);
+      [[g.e2, yn0], [g.e3, ynW]].forEach(function (p) { if (p[1] >= yb0 - 3) boxes.push({ x: p[0] - 5, y: p[1] - 5, w: 10, h: 10 }); });
+      // under the axis: the W_B arrow and text, and the '0' (drawn below), as obstacles for labels allowed there
+      var wbT = 'W_B = ' + (m.WB * 1e4).toFixed(2) + ' µm', wbW = plain(wbT).length * 11 * 0.6 + 4;
+      boxes.push({ x: (g.e2 + g.e3) / 2 - wbW / 2, y: yb1 + 17, w: wbW, h: 14 }, { x: g.e2 - 10, y: yb1 + 3, w: 12, h: 13 });
+      seg([g.e2, yb1 + 13], [g.e3, yb1 + 13]);
+      function plain(s) { return String(s).replace(/[_^]\{([^}]*)\}/g, '$1').replace(/_(.)/g, '$1').replace(/\*/g, ''); }
+      function free(b) {
+        if (b.x < g.x0 + 2 || b.x + b.w > g.x1 - 1 || b.y < yb0 - 2 || b.y + b.h > (b.below ? yb1 + 34 : yb1 - 1)) return false;
+        for (var k = 0; k < boxes.length; k++) { var o2 = boxes[k]; if (b.x < o2.x + o2.w && b.x + b.w > o2.x && b.y < o2.y + o2.h && b.y + b.h > o2.y) return false; }
+        for (k = 0; k < segs.length; k++) {
+          var sg = segs[k], n2 = Math.max(2, Math.ceil(Math.hypot(sg[2] - sg[0], sg[3] - sg[1]) / 2));
+          for (var c = 0; c <= n2; c++) { var xx = sg[0] + (sg[2] - sg[0]) * c / n2, yy = sg[1] + (sg[3] - sg[1]) * c / n2; if (xx > b.x - 1 && xx < b.x + b.w + 1 && yy > b.y - 1 && yy < b.y + b.h + 1) return false; }
+        }
+        return true;
+      }
+      function place(txts, cands, a, optional) {
+        for (var t = 0; t < txts.length; t++) for (var c = 0; c < cands.length; c++) {
+          var fs2 = a.fs || 12, wd = plain(txts[t]).length * fs2 * (a.fw ? 0.66 : 0.6) + 4, an = cands[c][2] || 'start';
+          var bx = an === 'end' ? cands[c][0] - wd : an === 'middle' ? cands[c][0] - wd / 2 : cands[c][0], b = { x: bx, y: cands[c][1] - 0.9 * fs2, w: wd, h: 1.4 * fs2, below: !!cands[c][3] };
+          if (!free(b)) continue;
+          boxes.push(b); var aa = {}; for (var kk in a) aa[kk] = a[kk]; aa.anchor = an;
+          return T(cands[c][0], cands[c][1], txts[t], aa);
+        }
+        if (optional) return ''; // the value is also in the readouts
+        st.ov = (st.ov || 0) + 1; st.ovList = (st.ovList || []).concat([plain(txts[0])]); return '';
+      }
+      if (yn0 >= yb0 - 3) o += place(['n(0) = ' + sciS(m.n0, 2), 'n(0)'], [[g.e2 + 8, yn0 - 9], [g.e2 + 8, yn0 + 17], [g.e2 + 8, yn0 - 22], [g.e2 + 8, yn0 + 30], [g.e2 + 8, yn0 - 36]], { fs: nar ? 10.5 : 11.5, fill: C.el, fw: 700 }, yn0 > yb1 - 8);
       if (ynW >= yb0 - 3 && Math.abs(ynW - yn0) > 18) {
         var lbl = m.nW / m.n0 < 0.02 ? 'n(W_B) ≈ 0' : 'n(W_B) = ' + sciS(m.nW, 1);
-        o += T(g.e3 - 4, Math.min(ynW - 7, yb1 - 6), lbl, { fs: nar ? 10 : 11, anchor: 'end', fill: C.el, halo: true });
+        o += place(lbl.indexOf('≈') > 0 ? [lbl] : [lbl, 'n(W_B)'], [[g.e3 - 9, ynW + 17, 'end'], [g.e3 - 9, ynW - 10, 'end'], [g.e3 + 8, ynW - 10], [g.e3 + 8, ynW + 17], [g.e3 - 9, ynW - 24, 'end'], [g.e3 + 8, ynW - 24], [g.e3 + 5, yb1 + 27, 'start', true], [g.e3, yb1 + 27, 'end', true]], { fs: nar ? 10 : 11, fill: C.el }, true);
       }
-      /* slope label */
-      var xm = g.e2 + (g.e3 - g.e2) * 0.55, ym = yn0 + (ynW - yn0) * 0.55;
+      /* slope label: parallel to the base line, 11 px above it (perpendicular offset), only where it fits along the line */
       if (yn0 > yb0 - 3 && ynW > yb0 - 3 && ynW - yn0 > 30) {
-        var ang = Math.atan2(ynW - yn0, g.e3 - g.e2) * 180 / Math.PI;
-        o += T(xm + 4, ym - 8, 'slope ∝ I_n', { fs: 11, anchor: 'middle', fill: C.navy, rot: ang, halo: true });
+        var dxl = g.e3 - g.e2, dyl = ynW - yn0, len = Math.hypot(dxl, dyl), ux = dxl / len, uy = dyl / len;
+        var tlen = plain('slope ∝ I_n').length * 11 * 0.6;
+        if (tlen < 0.7 * len) {
+          var cx = g.e2 + dxl * 0.5 + uy * 11, cy = yn0 + dyl * 0.5 - ux * 11; // normal (uy, -ux) points above the line
+          o += T(cx, cy, 'slope ∝ I_n', { fs: 11, anchor: 'middle', fill: C.navy, rot: Math.atan2(dyl, dxl) * 180 / Math.PI });
+          boxes.push({ x: cx - tlen / 2, y: cy - 10, w: tlen, h: 14 });
+        }
       }
-      o += T(g.e1 - 3, Math.min(ypE, yb1) - 6, 'p_E ×10', { fs: 10, anchor: 'end', fill: C.ho, halo: true });
-      if (ypC < yb1 - 3 && ypC >= yb0 - 3) o += T(g.e4 + 6, ypC - 6, 'p_C ÷10 → p_{C0} at contact', { fs: 10, fill: C.ho, halo: true });
-      else if (vcb >= 0.02) o += T(g.e4 + 6, yb1 - 6, 'p_C ≈ 0 (BC reverse)', { fs: 10, fill: C.ho });
+      o += place(['p_E ×10', 'p_E'], [[g.e1 - 4, Math.min(ypE, yb1) - 8, 'end'], [g.e1 - 4, Math.min(ypE, yb1) + 15, 'end'], [g.x0 + 4, Math.min(Y(pE0 * 10), yb1) - 8], [g.x0 + 4, Math.min(ypE, yb1) - 22]], { fs: 10, fill: C.ho }); // narrow screens: 'p_E' (×10 in the caption)
+      if (st.ideal && vcb < 0.02) o += place(['p_C = p_{C0}: ideal, no holes injected', 'no holes injected (ideal)', 'ideal: no holes', 'no holes'], [[g.e4 + 6, yb1 - 8], [g.e4 + 6, yb1 - 22], [g.e5 - 4, yb1 - 8, 'end'], [g.e5 - 4, yb1 - 22, 'end'], [g.e4 + 6, yb1 - 40], [g.e5 - 4, yb1 - 40, 'end'], [g.e5 - 4, (yb0 + yb1) / 2, 'end']], { fs: 10, fill: C.ho });
+      else if (ypC < yb1 - 3 && ypC >= yb0 - 3) o += place(['p_C ÷10 → p_{C0} at contact', 'p_C ÷10'], [[g.e4 + 6, ypC - 8], [g.e4 + 6, ypC + 16], [g.e4 + 6, ypC - 22], [g.e5 - 4, ypC + 16, 'end'], [g.e5 - 4, ypC + 30, 'end'], [g.e5 - 4, Math.max(ypC, yb0 + 40) - 30, 'end']], { fs: 10, fill: C.ho });
+      else if (vcb >= 0.02) o += place(['p_C ≈ 0 (BC reverse)', 'p_C ≈ 0'], [[g.e4 + 6, yb1 - 8], [g.e4 + 6, yb1 - 22]], { fs: 10, fill: C.ho });
       /* bottom: base width and region names */
       o += arrow(g.e2 + 8, yb1 + 13, g.e2, yb1 + 13, C.grey, 1, 5) + arrow(g.e3 - 8, yb1 + 13, g.e3, yb1 + 13, C.grey, 1, 5) + L(g.e2 + 8, yb1 + 13, g.e3 - 8, yb1 + 13, C.grey, 1);
       o += T((g.e2 + g.e3) / 2, yb1 + 27, 'W_B = ' + (m.WB * 1e4).toFixed(2) + ' µm', { fs: 11, anchor: 'middle', fill: C.grey });
@@ -587,6 +651,37 @@
       svgB.innerHTML = o;
     }
 
+    /* label placement for (c), (d) (B4): candidates tried in order, the first whose box touches no line, no box and stays
+       inside the frame is used; texts: [full, short...]; optional texts are left out when nothing fits */
+    function placer(F) {
+      var segs = [], boxes = [];
+      function plainS(s) { return String(s).replace(/[_^]\{([^}]*)\}/g, '$1').replace(/_(.)/g, '$1').replace(/\*/g, ''); }
+      function addLine(pts) { for (var k = 1; k < pts.length; k++) segs.push([pts[k - 1][0], pts[k - 1][1], pts[k][0], pts[k][1]]); }
+      function free(b) {
+        if (b.x < F.X0 + 2 || b.x + b.w > F.X1 - 1 || b.y < F.Y0 + 1 || b.y + b.h > F.Y1 - 1) return false;
+        for (var k = 0; k < boxes.length; k++) { var o2 = boxes[k]; if (b.x < o2.x + o2.w && b.x + b.w > o2.x && b.y < o2.y + o2.h && b.y + b.h > o2.y) return false; }
+        for (k = 0; k < segs.length; k++) {
+          var sg = segs[k];
+          if (Math.max(sg[0], sg[2]) < b.x - 1 || Math.min(sg[0], sg[2]) > b.x + b.w + 1 || Math.max(sg[1], sg[3]) < b.y - 1 || Math.min(sg[1], sg[3]) > b.y + b.h + 1) continue;
+          var n2 = Math.max(2, Math.ceil(Math.hypot(sg[2] - sg[0], sg[3] - sg[1]) / 2));
+          for (var c = 0; c <= n2; c++) { var xx = sg[0] + (sg[2] - sg[0]) * c / n2, yy = sg[1] + (sg[3] - sg[1]) * c / n2; if (xx > b.x - 1 && xx < b.x + b.w + 1 && yy > b.y - 1 && yy < b.y + b.h + 1) return false; }
+        }
+        return true;
+      }
+      function place(txts, cands, a, optional) {
+        for (var t = 0; t < txts.length; t++) for (var c = 0; c < cands.length; c++) {
+          var fs2 = a.fs || 12, wd = plainS(txts[t]).length * fs2 * (a.fw ? 0.66 : 0.6) + 4, an = cands[c][2] || 'start';
+          var bx = an === 'end' ? cands[c][0] - wd : an === 'middle' ? cands[c][0] - wd / 2 : cands[c][0], b = { x: bx, y: cands[c][1] - 0.9 * fs2, w: wd, h: 1.4 * fs2 };
+          if (!free(b)) continue;
+          boxes.push(b); var aa = {}; for (var kk in a) aa[kk] = a[kk]; aa.anchor = an; delete aa.halo;
+          return T(cands[c][0], cands[c][1], txts[t], aa);
+        }
+        if (optional) return '';
+        st.ov = (st.ov || 0) + 1; st.ovList = (st.ovList || []).concat([plainS(txts[0])]); return '';
+      }
+      return { line: addLine, box: function (b) { boxes.push(b); }, place: place };
+    }
+
     /* ---------------- panels (c), (d): I_C(V_CB) ---------------- */
     function curve(vbe, xa, xb, early, ideal) {
       var pts = [], n = 240, i, v, ks = -vbe;
@@ -594,7 +689,7 @@
       for (i = 0; i <= n; i++) xs.push(xa + (xb - xa) * i / n);
       for (v = ks - 0.12; v <= ks + 0.3; v += 0.002) if (v > xa && v < xb) xs.push(v);
       xs.sort(function (a, b) { return a - b; });
-      for (i = 0; i < xs.length; i++) { var mm = model(vbe, xs[i], early); pts.push([xs[i], ideal ? mm.Iideal : mm.IC]); }
+      for (i = 0; i < xs.length; i++) { var mm = model(vbe, xs[i], early, st.ideal); pts.push([xs[i], ideal ? mm.Iideal : mm.IC]); }
       return pts;
     }
     function plotFrame(w, h, xa, xb, ya, yb, ml2, mb, opt) {
@@ -613,7 +708,8 @@
       var K = 1e3;
       o += '<defs><clipPath id="' + uid + 'c"><rect x="' + F.X0 + '" y="' + F.Y0 + '" width="' + (F.X1 - F.X0) + '" height="' + (F.Y1 - F.Y0) + '"/></clipPath></defs>';
       o += R(F.fx(xa), F.Y0, F.fx(0) - F.fx(xa), F.Y1 - F.Y0, '#fdf3e7');
-      o += T(F.fx(-0.8) + 2, F.Y0 + 12, 'BC forward', { fs: 9.5, anchor: 'start', fill: C.ho });
+      var bcw = F.fx(0) - F.fx(-0.8) - 6, bct = bcw > 62 ? 'BC forward' : bcw > 36 ? 'BC fwd' : 'BC'; // stays inside the shaded band
+      o += T(F.fx(-0.8) + 2, F.Y0 + 12, bct, { fs: 9.5, anchor: 'start', fill: C.ho });
       ticks(xa, xb, 6).forEach(function (t) { var x = F.fx(t); o += L(x, F.Y1, x, F.Y1 + 4, C.ink) + T(x, F.Y1 + 16, fmtTick(t), { fs: 10.5, anchor: 'middle', fill: C.grey }); if (t !== 0) o += L(x, F.Y0, x, F.Y1, '#f0f2f5', 0.8); });
       ticks(0, yb * K, 4).forEach(function (t) { var y = F.fy(t / K); if (y < F.Y0 - 1) return; o += L(F.X0 - 4, y, F.X0, y, C.ink) + T(F.X0 - 6, y + 4, fmtTick(t), { fs: 10.5, anchor: 'end', fill: C.grey }); if (t) o += L(F.X0, y, F.X1, y, '#f0f2f5', 0.8); });
       o += L(F.X0, F.Y0, F.X0, F.Y1, C.ink) + L(F.X0, F.Y1, F.X1, F.Y1, C.ink);
@@ -622,36 +718,35 @@
       o += T((F.X0 + F.X1) / 2, h - 6, 'V_{CB} (V)', { fs: 11.5, anchor: 'middle', fill: C.grey });
       o += T(12, (F.Y0 + F.Y1) / 2, 'I_C (mA)', { fs: 11.5, anchor: 'middle', rot: -90, fill: C.grey });
       o += '<g clip-path="url(#' + uid + 'c)">';
-      var fam = [-0.054, -0.036, -0.018];
-      fam.forEach(function (d, i) {
-        var pts = curve(vbe + d, xa, xb, early);
-        o += P(polyIn(F, pts, ya, yb), C.faint, 1.2, ' opacity="' + (0.5 + 0.15 * i) + '"');
-      });
-      var cur = curve(vbe, xa, xb, early);
-      o += P(polyIn(F, cur, ya, yb), C.navy, 2.6);
+      // the three preset curves, faint and fixed; the curve of the present V_BE highlighted (B4)
+      var Pc = placer(F), clipY = function (pts) { return pts.map(function (p) { return [p[0], clamp(p[1], F.Y0, F.Y1)]; }); };
+      VBE_PRE.forEach(function (v) { var pp = polyIn(F, curve(v, xa, xb, early), ya, yb); o += P(pp, C.faint, 1.4); Pc.line(clipY(pp)); });
+      var cur = curve(vbe, xa, xb, early), cpp = polyIn(F, cur, ya, yb);
+      o += P(cpp, C.navy, 2.6); Pc.line(clipY(cpp));
       o += '</g>';
-      fam.forEach(function (d, i) {
-        var mm = model(vbe + d, 9.5, early);
-        var y = F.fy(mm.IC);
-        if (y > F.Y0 + 6 && y < F.Y1 - 4) o += T(F.X1 - 2, y - 4, (['×⅛', '×¼', '×½'])[i] + ' (' + Math.round(d * 1000) + ' mV)', { fs: 9.5, anchor: 'end', fill: C.grey, halo: true });
-      });
-      var ip = model(vbe, 9.5, early);
-      var lowC = vbe < 0.45;
-      o += T(F.X1 - 2, lowC ? F.fy(0) - 14 : F.fy(ip.IC) - 6, 'V_{BE} = ' + fV(vbe) + ' V', { fs: 11, anchor: 'end', fill: C.navy, fw: 700, halo: true });
-      /* plateau label */
-      var pv = model(vbe, 3, early).IC;
-      if (!lowC) o += T(F.fx(3.2), F.fy(pv) + 16, 'plateau: set by V_{BE} alone', { fs: 10.5, anchor: 'start', fill: C.navy, halo: true });
-      /* knee + zero */
-      var z = zeroVCB(vbe, early);
-      if (!lowC) {
-        o += '<circle cx="' + F.fx(z).toFixed(1) + '" cy="' + F.fy(0).toFixed(1) + '" r="3.5" fill="#fff" stroke="' + C.acc + '" stroke-width="1.6"/>';
-        o += T(F.fx(z) + 2, F.fy(0) + 15, 'zero ' + fV(z) + ' V', { fs: 10, anchor: 'start', fill: C.acc, halo: true });
-        o += T(F.fx(0) + 4, F.fy(model(vbe, -0.3, early).IC) + 16, '← knee', { fs: 10.5, anchor: 'start', fill: C.acc, halo: true });
-      } else o += T(F.fx(0.4), F.fy(0) - 14, vbe === 0 && vcb === 0 ? 'equilibrium: I_C = 0' : 'cut-off: I_C ≈ 0', { fs: 10.5, anchor: 'start', fill: C.navy, halo: true });
-      /* operating point */
+      Pc.line([[F.X0, F.fy(0)], [F.X1, F.fy(0)]]); Pc.line([[F.fx(0), F.Y0], [F.fx(0), F.Y1]]);
+      Pc.box({ x: F.fx(-0.8), y: F.Y0, w: bct.length * 5.8 + 4, h: 16 }); // "BC forward"
+      /* operating point (drawn first, so that the labels avoid it) */
       var yo = clamp(F.fy(m.IC), F.Y0, F.Y1);
       o += L(F.fx(vcb), F.Y1, F.fx(vcb), yo, C.acc, 1, ' stroke-dasharray="3 3"');
       o += '<circle cx="' + F.fx(vcb).toFixed(1) + '" cy="' + yo.toFixed(1) + '" r="6" fill="' + C.acc + '" stroke="#fff" stroke-width="2"/>';
+      Pc.line([[F.fx(vcb), F.Y1], [F.fx(vcb), yo]]); Pc.box({ x: F.fx(vcb) - 8, y: yo - 8, w: 16, h: 16 });
+      var lowC = vbe < 0.45, z = zeroVCB(vbe, early, st.ideal);
+      if (!lowC) { Pc.box({ x: F.fx(z) - 5, y: F.fy(0) - 5, w: 10, h: 10 }); o += '<circle cx="' + F.fx(z).toFixed(1) + '" cy="' + F.fy(0).toFixed(1) + '" r="3.5" fill="#fff" stroke="' + C.acc + '" stroke-width="1.6"/>'; }
+      VBE_PRE.forEach(function (v, i) {
+        var y = F.fy(model(v, 9.5, early, st.ideal).IC), on = Math.abs(v - vbe) < 5e-4;
+        o += Pc.place([fV(v) + ' V' + (i === 1 ? '' : i ? ' (×2)' : ' (×½)'), fV(v) + ' V'], [[F.X1 - 2, y - 6, 'end'], [F.X1 - 2, y + 16, 'end'], [F.X1 - 16, y - 6, 'end'], [F.X1 - 16, y + 16, 'end'], [F.X1 - 60, y - 6, 'end'], [F.X1 - 60, y + 16, 'end']], { fs: on ? 11 : 10, fill: on ? C.navy : C.grey, fw: on ? 700 : 400 });
+      });
+      var onPre = VBE_PRE.some(function (v) { return Math.abs(v - vbe) < 5e-4; });
+      if (!onPre) { var ip = model(vbe, 9.5, early, st.ideal), yi = lowC ? F.fy(0) : F.fy(ip.IC); o += Pc.place(yi < F.Y0 ? ['V_{BE} = ' + fV(vbe) + ' V: curve above the axis', 'V_{BE} = ' + fV(vbe) + ' V ↑'] : ['V_{BE} = ' + fV(vbe) + ' V'], (yi < F.Y0 ? [[F.X1 - 2, F.Y0 + 14, 'end'], [F.X1 - 2, F.Y0 + 28, 'end'], [F.fx(6), F.Y0 + 14, 'end'], [F.X1 - 2, F.Y0 + 42, 'end'], [F.fx(3.5), F.Y0 + 14, 'end'], [F.fx(3.5), F.Y0 + 28, 'end']] : []).concat([[F.X1 - 2, yi - 7, 'end'], [F.X1 - 2, yi + 17, 'end'], [F.X1 - 16, yi - 7, 'end'], [F.X1 - 16, yi + 17, 'end'], [F.X1 - 2, yi - 21, 'end'], [F.X1 - 2, yi + 31, 'end'], [F.fx(6), yi - 7, 'end'], [F.fx(6), yi - 21, 'end'], [F.fx(6), Math.min(yi, F.Y1) - 30, 'end']]), { fs: 11, fill: C.navy, fw: 700 }, yi < F.Y0); } // off scale: V_BE is on the slider
+      /* plateau label, knee and zero */
+      var pv = F.fy(model(vbe, 3, early, st.ideal).IC);
+      if (!lowC) {
+        o += Pc.place(['plateau: set by V_{BE} alone', 'plateau'], [[F.fx(3.2), pv + 16], [F.fx(3.2), pv - 8], [F.fx(1.2), pv + 16], [F.fx(1.2), pv - 8], [F.fx(5), pv + 30], [F.fx(3.2), pv + 30], [F.fx(1.2), pv + 30]], { fs: 10.5, fill: C.navy }, pv < F.Y0 + 2);
+        o += Pc.place(['zero ' + fV(z) + ' V', 'zero'], [[F.fx(z) + 6, F.fy(0) + 15], [F.fx(z) + 6, F.fy(0) + 29], [F.fx(z) - 6, F.fy(0) + 15, 'end'], [F.fx(z) + 6, F.fy(0) - 8], [F.fx(z) + 6, F.Y1 - 6]], { fs: 10, fill: C.acc }, true); // the zero is also written above (d)
+        var yk = F.fy(model(vbe, -0.3, early, st.ideal).IC);
+        o += Pc.place(['← knee'], [[F.fx(0) + 4, yk + 16], [F.fx(0) + 4, yk + 30], [F.fx(0) + 4, yk - 8], [F.fx(0.4) + 4, yk + 16]], { fs: 10.5, fill: C.acc }, true);
+      } else o += Pc.place([vbe === 0 && vcb === 0 ? 'equilibrium: I_C = 0' : 'cut-off: I_C ≈ 0'], [[F.fx(0.4), F.fy(0) - 14], [F.fx(0.4), F.fy(0) - 28], [F.fx(3), F.fy(0) - 14]], { fs: 10.5, fill: C.navy });
       svgC.innerHTML = o;
     }
     function drawD(m, vbe, vcb) {
@@ -661,50 +756,60 @@
       var F = plotFrame(w, h, xa, xb, ya, yb, w < 480 ? 44 : 50, 40), K = 1e3;
       o += '<defs><clipPath id="' + uid + 'd"><rect x="' + F.X0 + '" y="' + F.Y0 + '" width="' + (F.X1 - F.X0) + '" height="' + (F.Y1 - F.Y0) + '"/></clipPath></defs>';
       o += R(F.X0, F.Y0, F.X1 - F.X0, F.Y1 - F.Y0, '#fdf6ee');
-      [-0.65, -0.6, -0.55, -0.5, -0.45].forEach(function (t) { var x = F.fx(t); o += L(x, F.Y1, x, F.Y1 + 4, C.ink) + T(x, F.Y1 + 16, fmtTick(t), { fs: 10.5, anchor: 'middle', fill: C.grey }); o += L(x, F.Y0, x, F.Y1, '#f0e6da', 0.8); });
+      [-0.65, -0.6, -0.55, -0.5, -0.45].forEach(function (t) { var x = F.fx(t); o += L(x, F.Y1, x, F.Y1 + 4, C.ink) + T(x, F.Y1 + 16, fmtTick(t), { fs: 10.5, anchor: t > -0.46 ? 'end' : 'middle', fill: C.grey }); /* last tick kept inside the panel */ o += L(x, F.Y0, x, F.Y1, '#f0e6da', 0.8); });
       ticks(ya * K, yb * K, 4).forEach(function (t) { var y = F.fy(t / K); if (y < F.Y0 - 1 || y > F.Y1 + 1) return; o += L(F.X0 - 4, y, F.X0, y, C.ink) + T(F.X0 - 6, y + 4, fmtTick(t), { fs: 10.5, anchor: 'end', fill: C.grey }); });
       o += L(F.X0, F.Y0, F.X0, F.Y1, C.ink) + L(F.X0, F.Y1, F.X1, F.Y1, C.ink);
       o += L(F.X0, F.fy(0), F.X1, F.fy(0), '#8a96a5', 0.9);
       o += T((F.X0 + F.X1) / 2, h - 6, 'V_{CB} (V)', { fs: 11.5, anchor: 'middle', fill: C.grey });
       o += T(12, (F.Y0 + F.Y1) / 2, 'I_C (mA)', { fs: 11.5, anchor: 'middle', rot: -90, fill: C.grey });
       /* -V_BE line */
-      var xv = F.fx(-vbe);
-      if (-vbe > xa && -vbe < xb) {
-        o += L(xv, F.Y0, xv, F.Y1, C.grey, 1, ' stroke-dasharray="2 3"');
-        o += T(xv - 3, F.Y0 + 12, '−V_{BE}', { fs: 10.5, anchor: 'end', fill: C.grey, halo: true });
-      }
+      var Pd = placer(F), clipY = function (pts) { return pts.map(function (p) { return [p[0], clamp(p[1], F.Y0, F.Y1)]; }); };
+      var xv = F.fx(-vbe), vIn = -vbe > xa && -vbe < xb;
+      if (vIn) { o += L(xv, F.Y0, xv, F.Y1, C.grey, 1, ' stroke-dasharray="2 3"'); Pd.line([[xv, F.Y0], [xv, F.Y1]]); }
       o += '<g clip-path="url(#' + uid + 'd)">';
-      o += P(polyIn(F, curve(vbe, xa, xb, early, true), ya, yb), C.grey, 1.4, ' stroke-dasharray="5 4"');
-      o += P(polyIn(F, curve(vbe, xa, xb, early), ya, yb), C.navy, 2.6);
+      VBE_PRE.forEach(function (v) { var pp = polyIn(F, curve(v, xa, xb, early), ya, yb); o += P(pp, C.faint, 1.4); Pd.line(clipY(pp)); }); // fixed preset curves (B4)
+      if (!st.ideal) { var dp = polyIn(F, curve(vbe, xa, xb, early, true), ya, yb); o += P(dp, C.grey, 1.4, ' stroke-dasharray="5 4"'); Pd.line(clipY(dp)); }
+      var cp = polyIn(F, curve(vbe, xa, xb, early), ya, yb);
+      o += P(cp, C.navy, 2.6); Pd.line(clipY(cp));
       o += '</g>';
+      Pd.line([[F.X0, F.fy(0)], [F.X1, F.fy(0)]]);
       /* knee: second term = 10 % of the first (Sec. knee); zero of eq. (EMC) */
       var vk = -vbe + VT * Math.log(10 / AR);
-      var mk = model(vbe, vk, early);
-      var lowD = vbe < 0.45, z = zeroVCB(vbe, early), inZ = z > xa && z < xb;
+      var mk = model(vbe, vk, early, st.ideal);
+      var lowD = vbe < 0.45, z = zeroVCB(vbe, early, st.ideal), inZ = z > xa && z < xb, lab = '';
       if (!lowD && inZ) {
-        if (vk > xa && vk < xb) {
-          o += '<circle cx="' + F.fx(vk).toFixed(1) + '" cy="' + F.fy(mk.IC).toFixed(1) + '" r="3.2" fill="' + C.acc + '"/>';
-          o += T(F.fx(vk) + 6, F.fy(mk.IC) + 4, 'knee (−10 %)', { fs: 10, anchor: 'start', fill: C.acc, halo: true });
-        }
-        o += L(F.fx(z), F.Y0, F.fx(z), F.Y1, C.acc, 1, ' stroke-dasharray="4 3"');
+        o += L(F.fx(z), F.Y0, F.fx(z), F.Y1, C.acc, 1, ' stroke-dasharray="4 3"'); Pd.line([[F.fx(z), F.Y0], [F.fx(z), F.Y1]]);
         o += '<circle cx="' + F.fx(z).toFixed(1) + '" cy="' + F.fy(0).toFixed(1) + '" r="4.5" fill="#fff" stroke="' + C.acc + '" stroke-width="2"/>';
-        var zr = F.fx(z) > (F.X0 + F.X1) / 2;
-        o += T(F.fx(z) + (zr ? -6 : 6), F.fy(0) + 16, 'I_C = 0', { fs: 10.5, anchor: zr ? 'end' : 'start', fill: C.acc, fw: 700, halo: true });
-      } else if (lowD) o += T((F.X0 + F.X1) / 2, F.fy(0) - 12, 'no injection from the emitter: no knee', { fs: 10.5, anchor: 'middle', fill: C.navy, halo: true });
-      else o += T((F.X0 + F.X1) / 2, F.fy(0) - 12, 'zero at ' + fV(z) + ' V, outside this window', { fs: 10.5, anchor: 'middle', fill: C.acc, halo: true });
-      o += T(F.X1 - 2, F.Y1 - 8, 'dashed: no holes into C (α_R = 1)', { fs: 9.5, anchor: 'end', fill: C.grey, halo: true });
+        Pd.box({ x: F.fx(z) - 6, y: F.fy(0) - 6, w: 12, h: 12 });
+        var kx = F.fx(vk), ky = F.fy(mk.IC), kIn = vk > xa && vk < xb;
+        if (kIn) { o += '<circle cx="' + kx.toFixed(1) + '" cy="' + ky.toFixed(1) + '" r="3.2" fill="' + C.acc + '"/>'; Pd.box({ x: kx - 4, y: ky - 4, w: 8, h: 8 }); }
+      }
+      /* operating point (drawn before the labels, so that they avoid it) */
+      var opIn = vcb >= xa && vcb <= xb, yo = clamp(F.fy(m.IC), F.Y0, F.Y1);
+      if (opIn) Pd.box({ x: F.fx(vcb) - 8, y: yo - 8, w: 16, h: 16 });
+      if (vIn) lab += Pd.place(['−V_{BE}'], [[xv - 3, F.Y0 + 12, 'end'], [xv + 3, F.Y0 + 12], [xv - 3, F.Y0 + 26, 'end'], [xv + 3, F.Y0 + 26]], { fs: 10.5, fill: C.grey }, true);
+      if (!lowD && inZ) {
+        var zx = F.fx(z), z0 = F.fy(0);
+        lab += Pd.place(['I_C = 0'], [[zx + 6, z0 + 16], [zx - 6, z0 + 16, 'end'], [zx + 6, z0 + 30], [zx - 6, z0 + 30, 'end'], [zx + 6, z0 - 8], [zx - 6, z0 - 8, 'end'], [zx + 6, z0 + 44], [zx - 6, z0 + 44, 'end'], [zx + 6, z0 + 58], [zx - 6, z0 + 58, 'end'], [zx - 6, z0 - 22, 'end'], [zx + 6, z0 - 22], [zx - 6, z0 - 36, 'end'], [zx + 6, F.Y1 - 6], [zx - 6, F.Y1 - 6, 'end']], { fs: 10.5, fill: C.acc, fw: 700 }, true); // also written above (d)
+        if (kIn) lab += Pd.place(['knee (−10 %)', 'knee'], [[kx + 6, ky + 16], [kx + 6, ky - 8], [kx - 6, ky - 8, 'end'], [kx - 6, ky + 16, 'end'], [kx + 6, ky + 30], [kx + 6, ky - 22]], { fs: 10, fill: C.acc }, true);
+      } else if (lowD) lab += Pd.place(['no injection from the emitter: no knee', 'no injection: no knee'], [[(F.X0 + F.X1) / 2, F.fy(0) - 12, 'middle'], [(F.X0 + F.X1) / 2, F.fy(0) + 20, 'middle'], [(F.X0 + F.X1) / 2, F.Y0 + 14, 'middle'], [(F.X0 + F.X1) / 2, F.Y1 - 8, 'middle'], [F.X1 - 4, F.Y0 + 14, 'end'], [F.X1 - 4, F.Y1 - 8, 'end']], { fs: 10.5, fill: C.navy });
+      else lab += Pd.place(['zero at ' + fV(z) + ' V, outside this window', 'zero at ' + fV(z) + ' V'], [[(F.X0 + F.X1) / 2, F.fy(0) - 12, 'middle'], [(F.X0 + F.X1) / 2, F.fy(0) + 20, 'middle'], [(F.X0 + F.X1) / 2, F.Y0 + 14, 'middle']], { fs: 10.5, fill: C.acc });
+      lab += Pd.place([st.ideal ? 'ideal: no holes into C (α_R = 1)' : 'dashed: ideal, no holes into C (α_R = 1)', st.ideal ? 'ideal (α_R = 1)' : 'dashed: ideal (α_R = 1)'], [[F.X1 - 2, F.Y1 - 8, 'end'], [F.X1 - 2, F.Y1 - 22, 'end'], [F.X1 - 2, F.Y0 + 14, 'end']], { fs: 9.5, fill: C.grey }, true);
+      o += lab;
       /* operating point */
       if (vcb >= xa && vcb <= xb) {
         var yo = clamp(F.fy(m.IC), F.Y0, F.Y1);
         o += '<circle cx="' + F.fx(vcb).toFixed(1) + '" cy="' + yo.toFixed(1) + '" r="6" fill="' + C.acc + '" stroke="#fff" stroke-width="2"/>';
-      } else {
-        var right = vcb > xb, ya2 = (F.fy(0) + F.Y1) / 2 - 6;
-        o += right ? arrow(F.X1 - 34, ya2, F.X1 - 4, ya2, C.acc, 1.5, 6) : arrow(F.X0 + 34, ya2, F.X0 + 4, ya2, C.acc, 1.5, 6);
-        o += T(right ? F.X1 - 38 : F.X0 + 38, ya2 + 4, 'op. point at ' + fV(vcb, 2) + ' V', { fs: 9.5, anchor: right ? 'end' : 'start', fill: C.acc, halo: true });
+      } else { // the point is outside the window: an arrow at the side, with its label where it touches no curve
+        var right = vcb > xb, ysA = [(F.fy(0) + F.Y1) / 2 - 6, F.Y1 - 26, F.fy(0) - 22, F.Y0 + 30, (F.fy(0) + F.Y1) / 2 + 12];
+        for (var ia = 0; ia < ysA.length; ia++) {
+          var ya2 = ysA[ia], tl = Pd.place(['op. point at ' + fV(vcb, 2) + ' V', fV(vcb, 2) + ' V'], [[right ? F.X1 - 38 : F.X0 + 38, ya2 + 4, right ? 'end' : 'start']], { fs: 9.5, fill: C.acc }, true);
+          if (tl || ia === ysA.length - 1) { o += (right ? arrow(F.X1 - 34, ya2, F.X1 - 4, ya2, C.acc, 1.5, 6) : arrow(F.X0 + 34, ya2, F.X0 + 4, ya2, C.acc, 1.5, 6)) + tl; break; }
+        }
       }
       svgD.innerHTML = o;
       oZero.innerHTML = lowD ? 'no knee: the emitter does not inject' :
-        '<b>' + mh('I_C') + ' = 0 at ' + mh('V_{CB}') + ' = ' + fV(z) + ' V</b> (−' + mh('V_{BE}') + ' + ' + mh('V_T') + ' ln(1/' + mh('α_R') + ')' + (early ? ', with ' + mh('W_B') + '(' + mh('V_{CB}') + ')' : '') + ') · now ' + mh('I_C') + ' = ' + (Math.abs(m.IC) < 5e-13 ? '0' : fmtI(m.IC));
+        '<b>' + mh('I_C') + ' = 0 at ' + mh('V_{CB}') + ' = ' + fV(z) + ' V</b> (' + (st.ideal ? '−' + mh('V_{BE}') + ' exactly, ' + mh('α_R') + ' = 1: flat base line' : '−' + mh('V_{BE}') + ' + ' + mh('V_T') + ' ln(1/' + mh('α_R') + ')') + (early ? ', with ' + mh('W_B') + '(' + mh('V_{CB}') + ')' : '') + ') · now ' + mh('I_C') + ' = ' + (Math.abs(m.IC) < 5e-13 ? '0' : fmtI(m.IC));
     }
 
     /* ---------------- readouts and hint ---------------- */
@@ -718,6 +823,7 @@
         '<div><small>' + mh('I_B') + ' (EMB)</small><b>' + fmtI(m.IB) + '</b></div>' +
         '<div><small>' + mh('I_E') + ' = ' + mh('I_C') + ' + ' + mh('I_B') + '</small><b>' + fmtI(m.IE) + '</b></div>' +
         '<div><small>' + mh('I_C') + '/' + mh('I_B') + ' (' + mh('β_F') + ' = 121)</small><b>' + (isFinite(beta) ? beta.toFixed(beta < 10 ? 2 : 0).replace('-', '−') : '—') + '</b></div>' +
+        '<div><small>' + mh('α_R') + ' (reverse)</small><b>' + (st.ideal ? '1 (ideal)' : AR.toFixed(3)) + '</b></div>' +
         '<div><small>' + mh('V_{CE}') + ' = ' + mh('V_{CB}') + ' + ' + mh('V_{BE}') + '</small><b>' + fV(vcb + vbe) + ' V</b></div>' +
         '<div class="w2"><small>' + mh('n') + '(0) / ' + mh('n') + '(' + mh('W_B') + ')</small><b>' + sciH(m.n0, 2) + ' / ' + (m.nW / m.n0 < 1e-3 ? '≈ 0' : sciH(m.nW, 1)) + '</b></div>' +
         '<div><small>' + mh('W_B') + '</small><b>' + (m.WB * 1e4).toFixed(3) + ' µm</b></div>' +
@@ -735,9 +841,11 @@
       } else if (r < 0.02) {
         msg = '<b>' + mh('V_{CB}') + ' near 0 or BC forward, yet the plateau holds:</b> ' + mh('n_{B0}') + 'e<sup>−' + mh('V_{CB}') + '/' + mh('V_T') + '</sup> = ' + (r * 100 < 0.01 ? '<0.01' : (r * 100).toFixed(2)) + ' % of ' + mh('n') + '(0), still negligible.';
       } else if (m.IC > 0.03 * m.plateau) {
-        msg = '<b>' + mh('V_{CB}') + ' → −' + mh('V_{BE}') + ': the line flattens, ' + mh('I_C') + ' → 0.</b> The collector end rises to ' + (r * 100).toFixed(0) + ' % of ' + mh('n') + '(0): two pumps, and holes are injected into the collector.';
+        msg = '<b>' + mh('V_{CB}') + ' → −' + mh('V_{BE}') + ': the line flattens, ' + mh('I_C') + ' → 0.</b> The collector end rises to ' + (r * 100).toFixed(0) + ' % of ' + mh('n') + '(0): two pumps' +
+          (st.ideal ? ' (ideal: no holes enter the collector).' : ', and holes are injected into the collector.');
       } else if (m.IC > -0.03 * m.plateau) {
-        msg = '<b>' + mh('I_C') + ' = 0 at ' + mh('V_{CB}') + ' = −' + mh('V_{BE}') + ' + ' + mh('V_T') + ' ln(1/' + mh('α_R') + '):</b> the residual electron slope is cancelled by the holes injected into the collector.';
+        msg = st.ideal ? '<b>Ideal (' + mh('α_R') + ' = 1): ' + mh('I_C') + ' = 0 at ' + mh('V_{CB}') + ' = −' + mh('V_{BE}') + ' exactly:</b> the base line is flat, no electron current, and no holes enter the collector. This is an idealisation: the real zero is shifted by ' + mh('V_T') + ' ln(1/' + mh('α_R') + ') = ' + (VT * Math.log(1 / AR) * 1000).toFixed(1) + ' mV.'
+          : '<b>' + mh('I_C') + ' = 0 at ' + mh('V_{CB}') + ' = −' + mh('V_{BE}') + ' + ' + mh('V_T') + ' ln(1/' + mh('α_R') + '):</b> the base line is still slightly tilted; its electron current is cancelled by the holes injected into the collector.';
       } else {
         msg = '<b>Beyond the zero:</b> the collector end is now the higher one; ' + mh('I_C') + ' reverses and the transistor works upside down.';
       }
@@ -764,10 +872,12 @@
         var d = st[k] - disp[k];
         if (Math.abs(d) > (k === 'vbe' ? 2e-5 : 1e-4)) { disp[k] += d * a; moving = true; } else disp[k] = st[k];
       });
-      var vbe = disp.vbe, vcb = disp.vcb, m = model(vbe, vcb, st.early);
+      var vbe = disp.vbe, vcb = disp.vcb, m = model(vbe, vcb, st.early, st.ideal);
       // scales follow V_BE down to 0.5 V and freeze below (equilibrium, cut-off: the curves then sit at zero on a readable axis)
       var vs = Math.max(vbe, 0.5);
-      var tB = 1.25 * model(vs, vcb, st.early).n0 / 1e14, tC = 1.18 * model(vs, 10, st.early).IC, tD = 1.15 * model(vs, 0, st.early).IC;
+      // (c), (d): fixed axes (B4), set by the highest preset V_BE, so that changing V_BE moves the point between fixed curves
+      var vTop = VBE_PRE[VBE_PRE.length - 1];
+      var tB = 1.25 * model(vs, vcb, st.early, st.ideal).n0 / 1e14, tC = 1.12 * model(vTop, 10, st.early, st.ideal).IC, tD = 1.1 * model(vTop, 0, st.early, st.ideal).IC;
       if (!disp.yB) { disp.yB = tB; disp.yC = tC; disp.yD = tD; }
       [['yB', tB], ['yC', tC], ['yD', tD]].forEach(function (p) {
         var d = p[1] - disp[p[0]];
@@ -790,6 +900,15 @@
     window.addEventListener('resize', onResize);
     layout();
     kick();
+    // tests only: set a state and redraw at once (no animation needed)
+    root._ixState = { st: st, setVBE: setVBE, setVCB: setVCB, redraw: function () {
+      dirty = true; disp.vbe = st.vbe; disp.vcb = st.vcb;
+      var vs = Math.max(st.vbe, 0.5), vTop = VBE_PRE[2], m = model(st.vbe, st.vcb, st.early, st.ideal);
+      disp.yB = 1.25 * model(vs, st.vcb, st.early, st.ideal).n0 / 1e14; disp.yC = 1.12 * model(vTop, 10, st.early, st.ideal).IC; disp.yD = 1.1 * model(vTop, 0, st.early, st.ideal).IC;
+      st.ov = 0; st.ovList = [];
+      geoA = drawA(m, st.vbe, st.vcb); drawB(m, st.vbe, st.vcb); drawC(m, st.vbe, st.vcb); drawD(m, st.vbe, st.vcb); readouts(m, st.vbe, st.vcb);
+      lastSig = ''; syncButtons(); kref();
+    } };
   }
 
   window.IX = window.IX || {};
