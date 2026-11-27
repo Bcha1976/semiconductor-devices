@@ -13,6 +13,7 @@ The course follows one path, crystal → junction → transistor, in nine chapte
 - **Exercises**: 164 problems, one set per chapter and annex, with the 78 worked corrections folded under their problems.
 - **Interactives**: six interactive figures (the junction forms, injection and current, the NPN transistor, the Early effect, light on and off at a surface, the two capacitances).
 - **Downloads**: the course, exercises and solutions as PDF.
+- **Version française**: the whole site also exists in French under [`fr/`](https://bcha1976.github.io/semiconductor-devices/fr/) (course, exercises with corrections, interactives and PDFs). Every page has an **EN / FR** button in its top bar that opens the same page, at the same section, in the other language.
 
 The site is fully static (HTML, CSS and a little JavaScript). It needs no server, no account, and no internet connection once downloaded. Equations are pre-rendered. Visits are counted with [GoatCounter](https://www.goatcounter.com), a privacy-friendly statistics service that uses no cookies and collects no personal data; the site works fully without it.
 
