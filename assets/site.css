@@ -356,9 +356,13 @@ svg text{font-family:var(--sans)}
 .foot-more .fb-msg{max-width:760px;margin:2px 0 8px;font-size:13px;line-height:1.6;color:#3f4a57}
 @media (max-width:720px){.foot-more{margin-top:-10px;padding:0 16px 20px;text-align:center}.foot-more .fb-msg{margin-left:auto;margin-right:auto}}
 @media print{.foot-more{display:none}}
-/* Bilingual site (26 November 2026): EN/FR switch in the top bar, same page in the other language */
-.lang{flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:30px;padding:0 8px;margin-left:2px;border:1.5px solid rgba(255,255,255,.55);border-radius:6px;color:#fff;text-decoration:none;font:700 13px var(--sans);letter-spacing:.06em;transition:background .15s,color .15s}
-.lang:hover,.lang:focus-visible{background:#fff;color:var(--teal);border-color:#fff}
-@media (max-width:760px){.lang{order:2;height:28px;min-width:32px;font-size:12.5px}}
-@media (max-width:560px){html[lang=fr] .top .brand{flex:1 1 auto;min-width:0}html[lang=fr] .brand-t{white-space:normal;font-size:14px;line-height:1.15}}
-@media print{.lang{display:none}}
+/* Bilingual site: language switch EN | FR in the top bar, same design as the EA1 site (27 November 2026) */
+.top .lang{margin-left:auto;display:flex;align-items:center;gap:2px;flex:none;font:600 13px/1 var(--sans);letter-spacing:.04em;border:1px solid rgba(255,255,255,.35);border-radius:7px;padding:2px}
+.top .lang+.nav{margin-left:0}
+.top .lang>span,.top .lang>a{display:block;padding:6px 8px;border-radius:5px;color:#dbe8eb;text-decoration:none}
+.top .lang .lang-on{background:rgba(255,255,255,.18);color:#fff}
+.top .lang a:hover,.top .lang a:focus-visible{background:rgba(255,255,255,.12);color:#fff}
+@media (max-width:980px){.top .menu~.lang{margin-left:8px}}
+@media (max-width:760px){.top .brand{min-width:0;flex:1 1 0}.top .brand-txt{min-width:0}.top .brand-t{white-space:normal;line-height:1.2}.top .lang>span,.top .lang>a{padding:5px 6px}}
+@media (max-width:560px){html[lang=fr] .top .brand-t{font-size:14px;line-height:1.15}}
+@media print{.top .lang{display:none}}
