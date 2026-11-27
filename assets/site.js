@@ -112,13 +112,15 @@
   }
   if(document.readyState==='complete')start();else window.addEventListener('load',start);
 })();
-// Bilingual site (26 November 2026): the EN/FR switch opens the same page in the other language,
+// Bilingual site: the language switch (EN | FR) opens the same page in the other language,
 // at the section (or problem, or interactive) being read: labels are the same in both languages.
 (function(){
-  var a=document.querySelector('a.lang'); if(!a) return;
+  var a=document.querySelector('.lang a.lang-alt'); if(!a) return;
   function here(){
     var els=document.querySelectorAll('.main [id*=":"], .main .coursepart[id], .main section.tryit[id]'), cur=null;
-    for(var i=0;i<els.length;i++){ if(els[i].getBoundingClientRect().top<=110) cur=els[i]; else break; }
+    var lim=(parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop)||0)+40;
+    var best=-1e9;
+    for(var i=0;i<els.length;i++){ if(!els[i].getClientRects().length) continue; var r=els[i].getBoundingClientRect(); if(r.top<=lim&&r.top>=best){best=r.top;cur=els[i];} }
     return cur?cur.id:'';
   }
   a.addEventListener('click',function(){
