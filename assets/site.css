@@ -356,3 +356,9 @@ svg text{font-family:var(--sans)}
 .foot-more .fb-msg{max-width:760px;margin:2px 0 8px;font-size:13px;line-height:1.6;color:#3f4a57}
 @media (max-width:720px){.foot-more{margin-top:-10px;padding:0 16px 20px;text-align:center}.foot-more .fb-msg{margin-left:auto;margin-right:auto}}
 @media print{.foot-more{display:none}}
+/* Bilingual site (26 November 2026): EN/FR switch in the top bar, same page in the other language */
+.lang{flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:30px;padding:0 8px;margin-left:2px;border:1.5px solid rgba(255,255,255,.55);border-radius:6px;color:#fff;text-decoration:none;font:700 13px var(--sans);letter-spacing:.06em;transition:background .15s,color .15s}
+.lang:hover,.lang:focus-visible{background:#fff;color:var(--teal);border-color:#fff}
+@media (max-width:760px){.lang{order:2;height:28px;min-width:32px;font-size:12.5px}}
+@media (max-width:560px){html[lang=fr] .top .brand{flex:1 1 auto;min-width:0}html[lang=fr] .brand-t{white-space:normal;font-size:14px;line-height:1.15}}
+@media print{.lang{display:none}}

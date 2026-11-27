@@ -112,3 +112,17 @@
   }
   if(document.readyState==='complete')start();else window.addEventListener('load',start);
 })();
+// Bilingual site (26 November 2026): the EN/FR switch opens the same page in the other language,
+// at the section (or problem, or interactive) being read: labels are the same in both languages.
+(function(){
+  var a=document.querySelector('a.lang'); if(!a) return;
+  function here(){
+    var els=document.querySelectorAll('.main [id*=":"], .main .coursepart[id], .main section.tryit[id]'), cur=null;
+    for(var i=0;i<els.length;i++){ if(els[i].getBoundingClientRect().top<=110) cur=els[i]; else break; }
+    return cur?cur.id:'';
+  }
+  a.addEventListener('click',function(){
+    var id=here(), base=a.getAttribute('href').split('#')[0];
+    a.setAttribute('href', id?base+'#'+encodeURIComponent(id):base);
+  });
+})();
